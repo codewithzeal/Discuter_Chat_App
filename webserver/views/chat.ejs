@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="../style.css">
+  <script src="http://localhost:8000/socket.io/socket.io.js"></script>
+  <script defer src="../connect.js"></script>
+  <script>
+  function getMyInfo()
+  {
+    return "<%=uid%>"
+  }
+  </script>
+</head>
+
+<body>
+
+
+<div class="container-fluid pb-2" >
+
+    <div class="row" style="height: 10vh;background-color: #b30000;" id="navbar">
+      ye hai
+    </div>
+
+</div>
+<!-- Entire content-->    
+<div class="container-fluid">
+  <div class="row" id="origin">
+    <div class="col-sm-3 mr-2" id="contactOrigin">
+    
+  <!--This is add user area-->    
+  <div class="main" id="addUserBox">
+    <!-- Another variation with a button -->
+    <div class="input-group" >
+      <input type="text" class="form-control" placeholder="Enter id" id="f_id">
+      <div class="input-group-append">
+        <button class="btn btn-secondary" id="hideButton" type="button" onclick="addUser()">
+          Add
+        </button>
+      </div>
+    </div>
+  </div>
+    
+    <!--This is where users list will be displayed-->
+    <div id="contactListContainer">
+    
+    
+      <div class="row" style="position: sticky;top: 0px;">
+      <!--To search the freinds list-->
+      <div class="col-12 pb-1">
+        <div class="main" style="margin: 0%;width: 100%;">
+          <!-- Another variation with a button -->
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search contacts">
+            <div class="input-group-append">
+              <button class="btn btn-secondary" type="button">
+                <i class="fa fa-search"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    </div>
+    
+    </div>
+   
+
+
+    <!--This is the entire chat pane-->
+
+    <div class="col-sm-8" id="chatPane">
+      <div class="row" style="background-color:yellow;width: 100%;margin: 0%;padding: 0%;height: 6vh;position:sticky;top: 0%;">
+        <div class="col-sm-12"style="background-color:lightblue;" id="chatee"></div>
+      </div>
+      <div id="append-text">
+      
+  </div>
+
+
+
+    <!--Text typing area-->
+
+    <div class="row" style="position:sticky;bottom: 0px;width: 100%;margin: 0%;padding: 0%;height:7vh;border-radius: 10px;border: 2px solid purple;overflow: hidden;">
+     
+    <div class="col-12"style="margin:0px;padding:0px;overflow:hidden;">
+    <!--Typing area -->
+    <div class="main" style="margin: 0px;width: 100%;padding: 0%;height: 80%;overflow: hidden;">
+  
+
+  
+      <!-- Another variation with a button -->
+      <div class="input-group" style="margin: 0%;width: 100%;padding: 0%;height:auto;overflow: hidden;">
+        <button class="btn btn-secondary" type="button" id="attach" onclick="openup()">
+          <i class="fa fa-paperclip" style="position:static;top:0%;left:3px;"></i>
+          <input type="file" name="s_file" id="file-attachment" style="display: none;" multiple onchange="doUpload()">
+        </button>
+        
+        <textarea class="form-control" placeholder="Type text" style="margin: 0%;height: 90%;" id="content"></textarea>
+        <div class="input-group-append">
+          <button class="btn btn-secondary align-item-center" type="button" onclick="sendContent()">
+            <i class="fa fa-paper-plane" style="position:static;top:0%;left:0px;overflow:hidden;"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    </div>
+    
+  </div>
+  </div>
+</div>
+</div>
+
+
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content" style="background-color: white">
+    <span class="close">&times;</span>
+    <center>
+        <h1>
+            Previews
+        </h1>
+    </center>
+    <div class="container-fluid" >
+        <div class="row">
+
+            <div class="col-sm-3">
+
+            </div>
+
+            <div class="col-sm-6" style="background-color: #ddcccc;height: 300px;padding: 0%;">
+                <button class="test" style="margin-top: auto;top:43%;position: relative;z-index:999;position: absolute;margin: 0%;opacity:40%;background-color: #000;float: left;" onclick="prev()">
+                <i  class="fa fa-arrow-left" aria-hidden="true" style="width: 30px;height: 30px;margin-top:50%;padding: auto;color:white;"></i>
+                </button>
+
+                <button class="test1" style="margin-top: auto;top:43%;position: relative;z-index:999;position: absolute;margin: 0%;opacity:40%;background-color: #000;right: 0px;" onclick="next()">
+                    <i  class="fa fa-arrow-right" aria-hidden="true" style="width: 30px;height: 30px;margin-top:50%;padding: auto;color:white;"></i>
+                </button>
+
+                <img id="img" src="" style="margin: 0%; width: 100%;height: 100%;position: absolute;">
+            </div>
+            
+            <div class="col-sm-3">
+
+            </div>
+
+        </div>
+
+        <div class="row mt-1">
+            <div class="col-4">
+
+            </div>
+            <div class="col-4">
+                <center>
+                <div>
+                <button type="button" class="btn btn-danger" style="margin:0.5px; height: auto;" onclick="cancelUpload()">Cancel</button>
+                <button type="button" class="btn btn-success" style="margin:0.5px; height: auto;" onclick="filePost()">Send</button>
+                </div>
+                </center>
+            </div>
+            <div class="col-4">
+
+            </div>
+        </div>
+
+    </div>
+  </div>
+  
+</div>
+
+</div>
+<script>
+  var modal = document.getElementById("myModal");
+  var span = document.getElementsByClassName("close")[0];
+  span.onclick = function() {
+  modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+}
+  function next()
+{
+    if(c>=imgs.length-1)
+    {
+        c=imgs.length-1
+        return
+    }
+    else
+    {
+        c++;
+        val=imgs[c].split(".")
+        ext=val[val.length-1]
+        if(ext=='jpg'||ext=='jpeg'||ext=='png'||ext=='tiff')
+          document.getElementById("img").src=file_arr[c]
+        else
+          document.getElementById("img").src="/abcd.jpg"
+    }
+}
+
+function prev()
+{
+    if(c<=0)
+    {
+        c=0
+        return
+    }
+    else
+    {
+        c--;
+        val=imgs[c].split(".")
+        ext=val[val.length-1]
+        if(ext=='jpg'||ext=='jpeg'||ext=='png'||ext=='tiff')
+          document.getElementById("img").src=file_arr[c]
+        else
+          document.getElementById("img").src="/abcd.jpg"
+    }
+}
+</script>
+
+</body>
+</html>

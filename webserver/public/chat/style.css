@@ -1,0 +1,184 @@
+/* Styles for wrapping the search box */
+*:not(.fa){
+  font-family: Arial;
+}
+.main {
+    width: 50%;
+    margin: 50px auto;
+}
+
+/* Bootstrap 4 text input with search icon */
+
+.has-search .form-control {
+    padding-left: 2.375rem;
+}
+
+.has-search .form-control-feedback {
+    position: absolute;
+    z-index: 2;
+    display: block;
+    width: 2.375rem;
+    height: 2.375rem;
+    line-height: 2.375rem;
+    text-align: center;
+    pointer-events: none;
+    color: #aaa;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 1vw;
+  border-radius: 10px;
+  border: 2px solid gray;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  
+  border-radius: 10px;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background-image: url('https://media.istockphoto.com/photos/background-of-galaxy-and-stars-picture-id1035676256?b=1&k=6&m=1035676256&s=170667a&w=0&h=evHeACi0Ssr37uuHrkH9zwUItdHZV9INeykeWxwIgXo='); 
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #b30000; 
+}
+
+
+
+
+#origin
+{
+    height: 100%;margin: 0 auto;
+}
+#contactOrigin
+{
+    background-color:lavender;
+    padding:5px;
+    margin-top: 4px; 
+    height:80vh;
+    border:2px solid grey;
+    overflow: hidden;
+    overflow-x: hidden; 
+    background-color:gainsboro;
+    border-radius: 10px;
+}
+#addUserBox
+{
+    margin: 0%;width: 100%; border: 2px solid green; border-radius: 10px;overflow: hidden;
+}
+#contactListContainer
+{
+    background-color:rgb(195, 165, 235);
+    width:100%;
+    margin:0px;
+    height:90%;
+    padding:0px;
+    margin-top: 6px;
+    border-radius: 10px;
+    color: aliceblue;
+    overflow-x: hidden; 
+    border: 2px solid green;
+    overflow-y: auto;
+}
+.row.m-1.justify-content-center.contactDivision
+{
+    background-color: lightgreen; 
+    border-radius: 10px;
+    padding: 1px;
+    border: 2px solid white;
+    color: black;
+}
+.chatMaterial-left
+{
+    float:left;margin: 7px; clear: both;
+    background-color:rgb(50,143,168);padding:20px;border-radius:10%;
+}
+.chatMaterial-right
+{
+    float:right;margin: 7px; clear: both;
+    background-color:rgb(50,143,168);padding:20px;border-radius:10%;
+}
+.image-left
+{
+    float:left;margin: 7px; clear: both;
+    background-color:rgb(50,143,168);padding:10px;border-radius:10%;
+}
+.image-right
+{
+    float:right;margin: 7px; clear: both;
+    background-color:rgb(50,143,168);padding:10px;border-radius:10%;
+}
+#chatPane
+{
+    background-color:rgb(233, 162, 209);
+    padding:0px;
+    height:80vh;
+    border:2px solid grey;
+    border-radius: 10px;
+    overflow: auto ;
+    overflow-x: hidden;
+    margin-top: 4px;
+    
+}
+.file-left
+{
+    float:left;margin: 7px; clear: both;
+    background-color:rgb(50,143,168);padding:10px;border-radius:2%;
+}
+.file-right
+{
+    float:right;margin: 7px; clear: both;
+    background-color:rgb(50,143,168);padding:10px;border-radius:2%;
+}
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 30px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+  
+  /* Modal Content */
+  .modal-content {
+    background-color: #7a0a0a;
+    border: 1px solid #888;
+    width: 80%;
+    margin: auto;
+    height:auto;
+  }
+  .class:hover
+  {
+      opacity: 90%;
+  }
+
+  #hideButton
+  {
+    z-index: 0;
+  }
+  /* The Close Button */
+  .close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  .close:hover,
+  .close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+  }
