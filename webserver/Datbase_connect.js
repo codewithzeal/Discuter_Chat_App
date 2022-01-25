@@ -6,8 +6,8 @@ var log={
     var config=
     {
         host: 'localhost',
-        user: '',
-        password: '',
+        user: 'naman',
+        password: 'inaman123',
         database: 'chat'
     }
     const db=mysql.createConnection(config);

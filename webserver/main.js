@@ -11,6 +11,7 @@ var StoreMessage=require('./store-message.js')
 var filePost=require('./filePost.js')
 var checkLimit=require('./checkLimit.js')
 var updateLimit=require('./updateLimit.js')
+var signup=require('./signup.js')
 app.use(addUser);
 app.use(chat)
 app.use(login)
@@ -19,4 +20,5 @@ app.use(StoreMessage)
 app.use(filePost)
 app.use(checkLimit)
 app.use(updateLimit)
+app.use(signup)
 app.listen(3000);
