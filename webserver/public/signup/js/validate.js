@@ -1,3 +1,4 @@
+user=""//this variable is used by signal protocol store in order to fetch data
 function validate()
 {
     uname=document.getElementById('uname').value.toString()
@@ -18,7 +19,8 @@ function validate()
                 if(response=="ok")
                 alert("registered")
                 {
-                    generateKeys(uname)
+                    user=uname
+                    generateKeys()
                 }
                 if(response=="ae")
                 alert("User already exixts")
@@ -30,40 +32,71 @@ function validate()
         }
     )
 }
-
-function arrayBufferToBase64( buffer ) {
-	var binary = '';
-	var bytes = new Uint8Array( buffer );
-	var len = bytes.byteLength;
-	for (var i = 0; i < len; i++) {
-		binary += String.fromCharCode( bytes[ i ] );
-	}
-	return window.btoa( binary );
-}
-function base64ToArrayBuffer(base64) {
-    var binary_string =  window.atob(base64);
-    var len = binary_string.length;
-    var bytes = new Uint8Array( len );
-    for (var i = 0; i < len; i++)        {
-        bytes[i] = binary_string.charCodeAt(i);
-    }
-    return bytes.buffer;
-}
-
-
-function generateKeys(uname)
+function ab2str(buf) {
+    return String.fromCharCode.apply(null, new Uint8Array(buf));
+  }
+  
+async function exportCryptoKey(key) {
+    const exported = await window.crypto.subtle.exportKey(
+      "pkcs8",
+      key
+    );
+    const exportedAsString = ab2str(exported);
+    const exportedAsBase64 = window.btoa(exportedAsString);
+    const pemExported = `-----BEGIN PRIVATE KEY-----\n${exportedAsBase64}\n-----END PRIVATE KEY-----`;
+  
+    localStorage.setItem(user+'privatekey',pemExported)
+  }
+async function exportCryptoKey1(key) {
+    const exported = await window.crypto.subtle.exportKey(
+      "spki",
+      key
+    );
+    const exportedKeyBuffer = new Uint8Array(exported);
+    const exportedAsString = ab2str(exportedKeyBuffer);
+    const exportedAsBase64 = window.btoa(exportedAsString);
+    const pemExported = `-----BEGIN PUBLIC KEY-----\n${exportedAsBase64}\n-----END PUBLIC KEY-----`;
+  
+    //localStorage.setItem('publickey',pemExported)
+    uploadPublicKey(pemExported)
+  }
+function generateKeys()
 {
-    /* var KeyHelper = libsignal.KeyHelper;
-    store=new SignalProtocolStore()
-    var registrationId = KeyHelper.generateRegistrationId();
-    localStorage.setItem(uname+'rid',registrationId)
-    KeyHelper.generateIdentityKeyPair().then(function(identityKeyPair) {
-        localStorage.setItem(uname+'ikp',JSON.stringify({pubKey:arrayBufferToBase64(identityKeyPair.pubKey),privKey:arrayBufferToBase64(identityKeyPair.privKey)}))
-        KeyHelper.generateSignedPreKey(identityKeyPair, registrationId).then(function(signedPreKey) {
-        store.storeSignedPreKey(signedPreKey.keyId, signedPreKey);
-        });
-    });
-    KeyHelper.generatePreKey(registrationId).then(function(preKey) {
-    store.storePreKey(preKey.keyId, preKey.keyPair);
-    }); */
+    window.crypto.subtle.generateKey(
+        {
+          name: "RSA-OAEP",
+          // Consider using a 4096-bit key for systems that require long-term security
+          modulusLength: 2048,
+          publicExponent: new Uint8Array([1, 0, 1]),
+          hash: "SHA-256",
+        },
+        true,
+        ['encrypt','decrypt']
+      ).then((keyPair) => {
+       
+        exportCryptoKey1(keyPair.publicKey)  
+        exportCryptoKey(keyPair.privateKey);
+       
+      
+      });
+}
+function uploadPublicKey(value)
+{
+    $.ajax(
+        {
+            url:'storePublickey',
+            method:'POST',
+            contentType:'application/json',
+            data:JSON.stringify(
+                {
+                    uname:user,
+                    pubKey:value
+                }
+            ),
+            error:function(res)
+            {
+                alert(res)
+            }
+        }
+    )
 }

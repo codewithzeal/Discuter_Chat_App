@@ -138,6 +138,85 @@ function setCurrentName(fid)
   getChats()
   }
 }
+
+
+function str2ab(str) {
+  const buf = new ArrayBuffer(str.length);
+  const bufView = new Uint8Array(buf);
+  for (let i = 0, strLen = str.length; i < strLen; i++) {
+    bufView[i] = str.charCodeAt(i);
+  }
+  return buf;
+}
+
+function ab2b64(arrayBuffer) {
+  return window.btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer)));
+}
+
+function encryptMessage(content,toid)
+{
+  $.ajax(
+    {
+      url:'/getPublicKey',
+      method:'POST',
+      contentType:'application/json',
+      data:JSON.stringify(
+        {
+          id:toid
+        }
+      ),
+      success:function(res)
+      {
+        if(res.status=="ok")
+        {
+          const pem =res.pubKey
+          const pemHeader = "-----BEGIN PUBLIC KEY-----";
+          const pemFooter = "-----END PUBLIC KEY-----";
+          const pemContents = pem.substring(pemHeader.length, pem.length - pemFooter.length);
+          // base64 decode the string to get the binary data
+          const binaryDerString = window.atob(pemContents);
+          const binaryDer = str2ab(binaryDerString);
+
+          return window.crypto.subtle.importKey(
+            "spki",
+            binaryDer,
+            {
+              name: "RSA-OAEP",
+              hash: "SHA-256"
+            },
+            true,
+            ["encrypt"]
+          ).then((key)=>{
+              
+              let message = content
+              let enc = new TextEncoder();
+              enc= enc.encode(message);
+              return window.crypto.subtle.encrypt(
+                  {
+                    name: "RSA-OAEP"
+                  },
+                  key,
+                  enc
+                ).then((data)=>{
+                  
+                  localStorage.setItem("mssg",ab2b64(data))
+                  StoreMessage(ab2b64(data),uid,toid,false,"")
+                });
+          });
+        }
+        else
+        {
+          alert("error in encryption")
+        }
+      },
+      error:function(res)
+      {
+        alert("yaha wala")
+        console.log(JSON.stringify(res))
+      }
+    }
+  )
+}
 function sendContent()
 {
   var files = document.getElementById('file-attachment').files;
@@ -157,7 +236,8 @@ function sendContent()
         toid:current_person
       }
       AppendTextLeft(contentValue)
-      StoreMessage(contentValue,uid,current_person,false,"")
+      encryptMessage(contentValue,current_person)
+      
       socket.emit("send-text",message)
   }
 }
@@ -185,6 +265,7 @@ function AppendTextLeft(message)
 }
 function StoreMessage(texts,senders,receivers,checks,attachments)
 {
+  
   $.ajax(
     {
       url:'/store-message',
