@@ -89,7 +89,7 @@ function addUser()
 function attachLists(list)
 {
   current_person=list[0].id1;
-  setCurrentName(current_person)
+  setCurrentName(current_person,true)
   getChats()
   for(i=0;i<list.length;i++)
   appendContact(list[i].id1)
@@ -100,7 +100,7 @@ function appendContact(f_id,status)
   var div=document.createElement("div");
   div.setAttribute("class","row m-1 justify-content-center contactDivision");
   div.setAttribute("id",f_id);
-  div.setAttribute("onclick","setCurrentName('"+f_id+"')")
+  div.setAttribute("onclick","setCurrentName('"+f_id+"','"+false+"')")
   p=document.createElement("p");
   p.setAttribute("id","status"+f_id);
   p.innerHTML=f_id;
@@ -143,9 +143,9 @@ socket.on("add-me",(uname)=>{
 socket.on("remove-me",(data)=>{
   document.getElementById("status"+data).innerHTML=data
 })
-function setCurrentName(fid)
+function setCurrentName(fid,val)
 {
-  if(current_person==fid)
+  if(current_person==fid&&!val)
   return
   else{
   current_person=fid;
@@ -242,6 +242,7 @@ function decryptChats(response,uid,fid)
     c=0
     var i
     for(i=0;i<response.length;i++)
+    if(response[i].text)
     decryptMessage(response[i].text,uid,fid,i).then((data)=>{
 
      response[data.index].text=data.data
@@ -395,7 +396,7 @@ $.ajax(
     {
       if(response=="ok")
       {
-        for(i=0;i<files.length;console.log('me'))
+        for(i=0;i<files.length;)
         {
           objects[i].readAsDataURL(files[i]);
           objects[i].onload=e=>
@@ -446,7 +447,6 @@ function filePost()
   document.getElementById("file-attachment").files=null
   dict=JSON.stringify(dict)
   filecc=JSON.stringify(filec)
-  console.log(filecc)
   var fd=new FormData()
   fd.append('sender',uid)
   fd.append('recv',current_person)

@@ -46,7 +46,6 @@ function str2ab(str) {
               var enc = new TextDecoder("utf-8");
               var arr = new Uint8Array(data);
               rtvalue= enc.decode(arr)
-            console.log( rtvalue)
               //return(enc.decode(arr))
             }).catch((res)=>{
                 console.log(res)
