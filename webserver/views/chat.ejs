@@ -29,7 +29,7 @@
 
 <div class="container-fluid pb-2" >
 
-    <div class="row" style="height: 10vh;background-color: #b30000;" id="navbar">
+    <div class="row" style="height: 10vh;background-color: rgb(32, 76, 170);" id="navbar">
       ye hai
     </div>
 
@@ -37,7 +37,7 @@
 <!-- Entire content-->    
 <div class="container-fluid">
   <div class="row" id="origin">
-    <div class="col-sm-3 mr-2" id="contactOrigin">
+    <div class="col-sm-3" id="contactOrigin">
     
   <!--This is add user area-->    
   <div class="main" id="addUserBox">
@@ -85,45 +85,35 @@
 
     <div class="col-sm-8" id="chatPane">
       <div class="row" style="background-color:yellow;width: 100%;margin: 0%;padding: 0%;height: 6vh;position:sticky;top: 0%;">
-        <div class="col-sm-12"style="background-color:lightblue;" id="chatee"></div>
+        <div class="col-sm-12" style="background-color:rgb(255, 255, 255);" id="chatee"></div>
       </div>
-      <div id="append-text">
+      <div id="append-text" style="overflow-y: auto;height: 78%;padding: 20px;margin: 0%;">
       
   </div>
-
-
-
-    <!--Text typing area-->
-
-    <div class="row" style="position:sticky;bottom: 0px;width: 100%;margin: 0%;padding: 0%;height:7vh;border-radius: 10px;border: 2px solid purple;overflow: hidden;">
-     
-    <div class="col-12"style="margin:0px;padding:0px;overflow:hidden;">
-    <!--Typing area -->
-    <div class="main" style="margin: 0px;width: 100%;padding: 0%;height: 80%;overflow: hidden;">
-  
-
-  
-      <!-- Another variation with a button -->
-      <div class="input-group" style="margin: 0%;width: 100%;padding: 0%;height:auto;overflow: hidden;">
-        <button class="btn btn-secondary" type="button" id="attach" onclick="openup()">
-          <i class="fa fa-paperclip" style="position:static;top:0%;left:3px;"></i>
+<br>
+  <div class="row" style="width: 100%;margin: 2px;padding: 0%;height:10vh;border-radius: 10px;border: 2px solid black;overflow: hidden;background-color: rgb(235, 243, 164);background-attachment: fixed;margin-bottom: 6px;">
+      <div class="col-1" style="background-color: rgb(235, 243, 164);padding: 10px;">
+          <i class="fa fa-paperclip fa-lg" style="cursor: pointer;margin-left: 30%;" id="attach" onclick="openup()"></i>
           <input type="file" name="s_file" id="file-attachment" style="display: none;" multiple onchange="doUpload()">
-        </button>
-        
-        <textarea class="form-control" placeholder="Type text" style="margin: 0%;height: 90%;" id="content"></textarea>
-        <div class="input-group-append">
-          <button class="btn btn-secondary align-item-center" type="button" onclick="sendContent()">
-            <i class="fa fa-paper-plane" style="position:static;top:0%;left:0px;overflow:hidden;"></i>
-          </button>
-        </div>
       </div>
-    </div>
-    </div>
-    
+      <div class="col-10"style="padding: 10px;overflow: hidden;padding:0px">
+        <textarea style="width:100%;margin: 0%;padding: 7px;" id="content" placeholder="Type here"></textarea>
+      </div>
+      <div class="col-1" style="background-color: rgb(235, 243, 164);padding: 10px;margin: 0%;">
+        <i class="fa fa-paper-plane fa-lg" style="cursor: pointer;margin-left: 30%;" onclick="sendContent()"></i>
+      </div>
   </div>
+
   </div>
+
+
+
+  
 </div>
 </div>
+
+
+
 
 
 <div id="myModal" class="modal">

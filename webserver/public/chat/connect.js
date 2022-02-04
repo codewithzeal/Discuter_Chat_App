@@ -279,6 +279,7 @@ function getChats()
 
 function appendChats(result)
 {
+  dir=""
   document.getElementById("append-text").innerHTML=""
   if(result.length==0)
   {
@@ -286,21 +287,26 @@ function appendChats(result)
   }
   for(i=0;i<result.length;i++)
   {
-    div=document.createElement("div")
     if(result[i].sender_id==uid)
-      {
-        div.setAttribute("class","chatMaterial-left")
-        if(result[i].text)
-        {
+    dir="left"
+    else
+    dir="right"
+    div=document.createElement("div")
+    document.getElementById("append-text").appendChild(div); 
+    div.setAttribute("class","chatMaterial-"+dir)
+    div.setAttribute("id","parrent-div"+i)
+    if(result[i].text)
+    {
          
-            div.innerHTML=result[i].text
-          
-          //div.setAttribute("style","background-color:rgb(50,143,168);padding:20px;border-radius:10%;")
-          document.getElementById("append-text").appendChild(div); 
-        }
+          p=document.createElement("p")
+          p.setAttribute("class","content-text")
+          p.setAttribute("id","text"+i)
+          p.innerHTML=result[i].text
+          div.appendChild(p)
+    }
         else if(result[i].attachment)
         {
-          div.setAttribute("class","file-left")
+          div.setAttribute("class","file-"+dir)
           document.getElementById("append-text").appendChild(div)
           ext=result[i].attachment.split(".")
           ext=ext[ext.length-1]
@@ -321,52 +327,31 @@ function appendChats(result)
             button.setAttribute("onclick","download('"+result[i].attachment+"')")
             p=document.createElement("p")
             p.innerHTML=result[i].attachment
-            p.setAttribute("style","float:left")
+            p.setAttribute("style","float:left;margin:auto;")
             div.appendChild(p)
             div.appendChild(button)
           }
         }
-      }
-      else //(result[i].sender_id==current_person)
-      {
-        div.setAttribute("class","chatMaterial-right")
-        if(result[i].text)
-        {
-          
-            div.innerHTML=result[i].text
-          
-          //div.setAttribute("style","background-color:rgb(50,143,168);padding:20px:border-radius:10%;")
-          document.getElementById("append-text").appendChild(div); 
-        }
-        else if(result[i].attachment)
-        {
-          div.setAttribute("class","file-right")
-          document.getElementById("append-text").appendChild(div)
-          ext=result[i].attachment.split(".")
-          ext=ext[ext.length-1]
-          if(ext=='jpg'||ext=='jpeg'||ext=='png'||ext=='tiff')
-          {
-            img=document.createElement("img")
-            img.setAttribute("src",'/'+result[i].attachment)
-            img.setAttribute("style","width:250px;height:250px;margin:0px")
-            div.appendChild(img)
+      
+        div.style.width="max-content"
+        div2=document.getElementById("parrent-div"+i)
+        if(div2.offsetWidth<100){
+          //alert("Yaha")
+            div2.style.width="100px"
           }
-          else
-          {
-            button=document.createElement("button")
-            icon=document.createElement("i")
-            icon.setAttribute("class","fa fa-download")
-            button.innerHTML='<i class="fa fa-download" aria-hidden="true"></i>'
-            button.setAttribute("style","width:40px;height:40px;float:right")
-            button.setAttribute("onclick","download('"+result[i].attachment+"')")
-            p=document.createElement("p")
-            p.innerHTML=result[i].attachment
-            p.setAttribute("style","float:left")
-            div.appendChild(p)
-            div.appendChild(button)
-          }
-        }
-      }
+          else if(div2.offsetWidth>250)
+          div2.style.width="250px"
+        div3=document.createElement("div")
+        div3.setAttribute("class","status-box")
+        div.appendChild(div3)
+        p2=document.createElement("p")
+        val=result[i].dateCreated
+        val=val.replace('T',' ')
+        val=val.replace('.000Z','')
+        d=new Date(val)
+        p2.innerHTML=d.toLocaleTimeString()
+        p2.setAttribute("class","status-text")
+        div3.appendChild(p2)
   }
 }
 function doUpload()
