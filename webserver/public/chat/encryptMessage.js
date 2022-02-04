@@ -23,7 +23,7 @@ function _base64ToArrayBuffer(base64) {
   
   function importKey(key)
   {
-    console.log("the key to import is: ",key)
+    //console.log("the key to import is: ",key)
     return new Promise((s,r)=>{
       _base64ToArrayBuffer(key).then((data)=>{
         const rawKey = data
@@ -48,7 +48,7 @@ function _base64ToArrayBuffer(base64) {
       importKey(key).then((key)=>{
   
         let encoded = getMessageEncoding(content);
-        console.log(encoded)
+        //console.log(encoded)
         //iv = b642ab("aGVsbG8=")
         window.crypto.subtle.encrypt(
           {
