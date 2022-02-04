@@ -14,6 +14,7 @@ var updateLimit=require('./updateLimit.js')
 var signup=require('./signup.js')
 var storePublicKey=require('./storePublicKey.js')
 var getPublicKey=require('./getPublicKey.js')
+var loadTempKeys=require('./loadTempKey.js')
 app.use(addUser);
 app.use(chat)
 app.use(login)
@@ -25,4 +26,5 @@ app.use(updateLimit)
 app.use(signup)
 app.use(storePublicKey)
 app.use(getPublicKey)
+app.use(loadTempKeys)
 app.listen(3000);

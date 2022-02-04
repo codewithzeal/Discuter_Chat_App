@@ -14,7 +14,7 @@ app.post('/addUser',(req,res)=>{
     }
     var querry1="select uid from users where uid='"+fid+"'";
     var queery2="select sno from contacts where c_id='"+fid+"' and f_id='"+uid+"' or c_id='"+uid+"' and f_id='"+fid+"'"
-    var querry3="insert into contacts(c_id,f_id)values('"+uid+"','"+fid+"')";
+    var querry3="insert into contacts(c_id,f_id,temp_key)values('"+uid+"','"+fid+"','"+req.body.temp_key+"')";
     var flag=0
     sql.query(querry1,(err,result)=>{
         if(err) 

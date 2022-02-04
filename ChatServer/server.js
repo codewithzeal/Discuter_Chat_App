@@ -21,6 +21,7 @@ io.on("connection",(socket)=>{
 
     socket.on("send-text",(data)=>{
       io.to(users_map[data.toid]).emit("recieve-text",data.content)
+      //console.log(data.content)
     })
 
     socket.on("send-files",data=>{

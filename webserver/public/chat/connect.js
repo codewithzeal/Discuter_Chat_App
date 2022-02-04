@@ -15,7 +15,7 @@ span.onclick = function() {
   modal.style.display = "none";
 }
 
-// When the user clicks anywhere outside of the modal, close it
+
 window.onclick = function(event) {
   if (event.target == modal) {
     modal.style.display = "none";
@@ -56,7 +56,8 @@ function getUsersOnline()
 function addUser()
 {
   fid=document.getElementById("f_id").value.toString();
-  if(fid)
+  getKeys(uid,fid).then((data)=>{
+    if(fid)
   {
     $.ajax({
       url: '/addUser',
@@ -64,11 +65,13 @@ function addUser()
       contentType: 'application/json',
       data:JSON.stringify({
           f_id: fid,
-          uid:uid
+          uid:uid,
+          temp_key:data
       }),
       success: function(response) {
-        if(response=="OK")
+        if(response=="OK"){
         appendContact(fid);
+      }
         else if(response=="N")
         alert("InvalidId such a user does not exists");
         else if(response=="already")
@@ -78,6 +81,9 @@ function addUser()
       }
   });
   }
+
+  })
+  
 }
 
 function attachLists(list)
@@ -90,6 +96,7 @@ function attachLists(list)
 }
 function appendContact(f_id,status)
 {
+  if(localStorage.getItem(uid+f_id)){
   var div=document.createElement("div");
   div.setAttribute("class","row m-1 justify-content-center contactDivision");
   div.setAttribute("id",f_id);
@@ -99,6 +106,14 @@ function appendContact(f_id,status)
   p.innerHTML=f_id;
   document.getElementById("contactListContainer").appendChild(div)
   document.getElementById(f_id).appendChild(p);
+  }
+  else
+  {
+    loadKeys(uid,f_id).then((key)=>{
+      localStorage.setItem(uid+f_id,key)
+      appendContact(f_id,status)
+    })
+  }
 }
 function setStatus()
 {
@@ -140,83 +155,7 @@ function setCurrentName(fid)
 }
 
 
-function str2ab(str) {
-  const buf = new ArrayBuffer(str.length);
-  const bufView = new Uint8Array(buf);
-  for (let i = 0, strLen = str.length; i < strLen; i++) {
-    bufView[i] = str.charCodeAt(i);
-  }
-  return buf;
-}
 
-function ab2b64(arrayBuffer) {
-  return window.btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer)));
-}
-
-function encryptMessage(content,toid)
-{
-  $.ajax(
-    {
-      url:'/getPublicKey',
-      method:'POST',
-      contentType:'application/json',
-      data:JSON.stringify(
-        {
-          id:toid
-        }
-      ),
-      success:function(res)
-      {
-        if(res.status=="ok")
-        {
-          const pem =res.pubKey
-          const pemHeader = "-----BEGIN PUBLIC KEY-----";
-          const pemFooter = "-----END PUBLIC KEY-----";
-          const pemContents = pem.substring(pemHeader.length, pem.length - pemFooter.length);
-          // base64 decode the string to get the binary data
-          const binaryDerString = window.atob(pemContents);
-          const binaryDer = str2ab(binaryDerString);
-
-          return window.crypto.subtle.importKey(
-            "spki",
-            binaryDer,
-            {
-              name: "RSA-OAEP",
-              hash: "SHA-256"
-            },
-            true,
-            ["encrypt"]
-          ).then((key)=>{
-              
-              let message = content
-              let enc = new TextEncoder();
-              enc= enc.encode(message);
-              return window.crypto.subtle.encrypt(
-                  {
-                    name: "RSA-OAEP"
-                  },
-                  key,
-                  enc
-                ).then((data)=>{
-                  
-                  localStorage.setItem("mssg",ab2b64(data))
-                  StoreMessage(ab2b64(data),uid,toid,false,"")
-                });
-          });
-        }
-        else
-        {
-          alert("error in encryption")
-        }
-      },
-      error:function(res)
-      {
-        alert("yaha wala")
-        console.log(JSON.stringify(res))
-      }
-    }
-  )
-}
 function sendContent()
 {
   var files = document.getElementById('file-attachment').files;
@@ -236,9 +175,13 @@ function sendContent()
         toid:current_person
       }
       AppendTextLeft(contentValue)
-      encryptMessage(contentValue,current_person)
+      encryptMessage(contentValue,current_person).then((mssg)=>{
+        
+        socket.emit("send-text",{toid:current_person,content:mssg})
+        StoreMessage(mssg,uid,current_person,false,"")
+      })
       
-      socket.emit("send-text",message)
+      
   }
 }
 
@@ -252,7 +195,9 @@ function AppendTextRight(message)
 {
   div=document.createElement("div");
   div.setAttribute("class","chatMaterial-right")
-  div.innerHTML=message
+  decryptMessage(message,uid,current_person,0).then((data)=>{
+    div.innerHTML=data.data
+  });
   document.getElementById("append-text").appendChild(div)
 }
 
@@ -289,6 +234,24 @@ function StoreMessage(texts,senders,receivers,checks,attachments)
   )
 }
 
+function decryptChats(response,uid,fid)
+{
+ t=response.length-1
+  return new Promise((s,r)=>{
+    a=[]
+    c=0
+    var i
+    for(i=0;i<response.length;i++)
+    decryptMessage(response[i].text,uid,fid,i).then((data)=>{
+
+     response[data.index].text=data.data
+     if(data.index==t)
+     s("done")
+    })
+  })
+  
+}
+
 function getChats()
 {
   if(fetched[current_person])
@@ -305,10 +268,13 @@ function getChats()
     success:function(response)
     {
       
-      appendChats(response);
+      decryptChats(response,uid,current_person).then((data)=>{
+          appendChats(response)
+      })
     }
   })
 }
+
 
 function appendChats(result)
 {
@@ -325,7 +291,9 @@ function appendChats(result)
         div.setAttribute("class","chatMaterial-left")
         if(result[i].text)
         {
-          div.innerHTML=result[i].text;
+         
+            div.innerHTML=result[i].text
+          
           //div.setAttribute("style","background-color:rgb(50,143,168);padding:20px;border-radius:10%;")
           document.getElementById("append-text").appendChild(div); 
         }
@@ -363,7 +331,9 @@ function appendChats(result)
         div.setAttribute("class","chatMaterial-right")
         if(result[i].text)
         {
-          div.innerHTML=result[i].text;
+          
+            div.innerHTML=result[i].text
+          
           //div.setAttribute("style","background-color:rgb(50,143,168);padding:20px:border-radius:10%;")
           document.getElementById("append-text").appendChild(div); 
         }
