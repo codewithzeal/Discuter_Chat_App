@@ -20,7 +20,7 @@ io.on("connection",(socket)=>{
     })
 
     socket.on("send-text",(data)=>{
-      io.to(users_map[data.toid]).emit("recieve-text",data.content)
+      io.to(users_map[data.toid]).emit("recieve-text",{content:data.content,giverId:data.myId})
       //console.log(data.content)
     })
 

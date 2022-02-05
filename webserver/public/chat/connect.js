@@ -10,6 +10,7 @@ imgs=[]
 c=0
 size=0
 fetched={}
+index=0
 var span = document.getElementsByClassName("close")[c];
 span.onclick = function() {
   modal.style.display = "none";
@@ -88,8 +89,9 @@ function addUser()
 
 function attachLists(list)
 {
+  
   current_person=list[0].id1;
-  setCurrentName(current_person,true)
+  setCurrentName(current_person,'true')
   getChats()
   for(i=0;i<list.length;i++)
   appendContact(list[i].id1)
@@ -100,7 +102,7 @@ function appendContact(f_id,status)
   var div=document.createElement("div");
   div.setAttribute("class","row m-1 justify-content-center contactDivision");
   div.setAttribute("id",f_id);
-  div.setAttribute("onclick","setCurrentName('"+f_id+"','"+false+"')")
+  div.setAttribute("onclick","setCurrentName('"+f_id+"','false')")
   p=document.createElement("p");
   p.setAttribute("id","status"+f_id);
   p.innerHTML=f_id;
@@ -145,11 +147,17 @@ socket.on("remove-me",(data)=>{
 })
 function setCurrentName(fid,val)
 {
-  if(current_person==fid&&!val)
+  if(current_person==fid&&val!='true')
   return
   else{
   current_person=fid;
   document.getElementById("chatee").innerHTML=fid
+  if(document.getElementById(fid))
+  {
+    a=document.getElementById(fid).style.backgroundColor;
+    if(a=="red")
+    document.getElementById(fid).style.backgroundColor="lightgreen";
+  }
   getChats()
   }
 }
@@ -174,10 +182,13 @@ function sendContent()
         content:contentValue,
         toid:current_person
       }
-      AppendTextLeft(contentValue)
+      AppendText(contentValue,"left")
+      var element = document.getElementById("append-text");
+      element.scrollTop = element.scrollHeight - element.clientHeight;
+      document.getElementById("content").value=""
       encryptMessage(contentValue,current_person).then((mssg)=>{
         
-        socket.emit("send-text",{toid:current_person,content:mssg})
+        socket.emit("send-text",{toid:current_person,content:mssg,myId:uid})
         StoreMessage(mssg,uid,current_person,false,"")
       })
       
@@ -186,28 +197,66 @@ function sendContent()
 }
 
 socket.on("recieve-text",(message)=>{
-AppendTextRight(message)
+if(current_person==message.giverId)
+  AppendText(message.content,"right")
+else
+{
+  document.getElementById(message.giverId).style.backgroundColor="red";
+}
 })
 socket.on("receive-files",(data)=>{
   appendFileRight(data)
 })
-function AppendTextRight(message)
+
+function createBox(data,div)
 {
-  div=document.createElement("div");
-  div.setAttribute("class","chatMaterial-right")
-  decryptMessage(message,uid,current_person,0).then((data)=>{
-    div.innerHTML=data.data
-  });
-  document.getElementById("append-text").appendChild(div)
+  p=document.createElement("p")
+  p.setAttribute("class","content-text")
+  p.setAttribute("id","text"+index)
+  p.innerHTML=data
+  div.appendChild(p)
+  div.style.width="max-content"
+  div2=document.getElementById("parrent-div"+index)
+  if(div2.offsetWidth<100){
+    //alert("Yaha")
+      div2.style.width="100px"
+    }
+    else if(div2.offsetWidth>250)
+    div2.style.width="250px"
+  div3=document.createElement("div")
+  div3.setAttribute("class","status-box")
+  div.appendChild(div3)
+  p2=document.createElement("p")
+  d=new Date()
+  d=d.toLocaleTimeString()
+  p2.innerHTML=d
+  p2.setAttribute("class","status-text")
+  div3.appendChild(p2)
+  index++;
 }
 
-function AppendTextLeft(message)
+function AppendText(message,dir)
+{
+  div=document.createElement("div");
+  div.setAttribute("class","chatMaterial-"+dir)
+  document.getElementById("append-text").appendChild(div)
+  div.setAttribute("id","parrent-div"+index)
+  if(dir=="right")
+  decryptMessage(message,uid,current_person,0).then((data)=>{
+         createBox(data.data,div)
+  });
+  else
+  createBox(message,div)
+ 
+}
+
+/* function AppendTextLeft(message)
 {
   div=document.createElement("div");
   div.setAttribute("class","chatMaterial-left")
   div.innerHTML=message
   document.getElementById("append-text").appendChild(div)
-}
+} */
 function StoreMessage(texts,senders,receivers,checks,attachments)
 {
   
@@ -234,27 +283,24 @@ function StoreMessage(texts,senders,receivers,checks,attachments)
   )
 }
 
-function decryptChats(response,uid,fid)
+async function decryptChats(response,uid,fid)
 {
- t=response.length-1
-  return new Promise((s,r)=>{
+  t=response.length-1
     a=[]
     c=0
     var i
-    for(i=0;i<response.length;i++)
+    for(i=0;i<response.length;i++){
     if(response[i].text)
-    decryptMessage(response[i].text,uid,fid,i).then((data)=>{
-
+    await decryptMessage(response[i].text,uid,fid,i).then((data)=>{
      response[data.index].text=data.data
-     if(data.index==t)
-     s("done")
     })
-  })
-  
+  }
+  return response 
 }
 
 function getChats()
 {
+  
   if(fetched[current_person])
   return
   result=""
@@ -268,7 +314,6 @@ function getChats()
     }),
     success:function(response)
     {
-      
       decryptChats(response,uid,current_person).then((data)=>{
           appendChats(response)
       })
@@ -279,7 +324,10 @@ function getChats()
 
 function appendChats(result)
 {
+  
+  
   dir=""
+  var i
   document.getElementById("append-text").innerHTML=""
   if(result.length==0)
   {
@@ -287,6 +335,7 @@ function appendChats(result)
   }
   for(i=0;i<result.length;i++)
   {
+    check=true
     if(result[i].sender_id==uid)
     dir="left"
     else
@@ -319,28 +368,33 @@ function appendChats(result)
           }
           else
           {
-            button=document.createElement("button")
+            check=false
+            divWrap=document.createElement("div")
+            div.appendChild(divWrap)
             icon=document.createElement("i")
-            icon.setAttribute("class","fa fa-download")
-            button.innerHTML='<i class="fa fa-download" aria-hidden="true"></i>'
-            button.setAttribute("style","width:40px;height:40px;float:right")
-            button.setAttribute("onclick","download('"+result[i].attachment+"')")
+            icon.setAttribute("class","fa fa-download fa-sm")
+            icon.setAttribute("onclick","download('"+result[i].attachment+"')")
+            icon.setAttribute("style","float:right;position:relative;margin-top:4px;cursor:pointer;")
             p=document.createElement("p")
             p.innerHTML=result[i].attachment
-            p.setAttribute("style","float:left;margin:auto;")
-            div.appendChild(p)
-            div.appendChild(button)
+            p.setAttribute("style","float:left;margin:auto;font-size:15px;color:white")
+            divWrap.appendChild(p)
+            divWrap.appendChild(icon)
+            div.style.backgroundColor="rgb(236,105,162)"
+            clearDiv=document.createElement("div")
+            clearDiv.setAttribute("style","clear:both;")
+            div.appendChild(clearDiv)
           }
         }
       
         div.style.width="max-content"
         div2=document.getElementById("parrent-div"+i)
-        if(div2.offsetWidth<100){
+        if(div2.offsetWidth<100&&check){
           //alert("Yaha")
             div2.style.width="100px"
           }
-          else if(div2.offsetWidth>250)
-          div2.style.width="250px"
+          else if(div2.offsetWidth>250&&check){
+          div2.style.width="250px"}
         div3=document.createElement("div")
         div3.setAttribute("class","status-box")
         div.appendChild(div3)
@@ -352,7 +406,9 @@ function appendChats(result)
         p2.innerHTML=d.toLocaleTimeString()
         p2.setAttribute("class","status-text")
         div3.appendChild(p2)
+        
   }
+  index=i
 }
 function doUpload()
 {
@@ -528,6 +584,8 @@ function appendFileLeft(file_names)
     div=document.createElement("div")
     div.setAttribute("class","file-left")
     document.getElementById("append-text").appendChild(div)
+    div.setAttribute("id","parrent-div"+index)
+    
     ext=file_names[i].split(".")
     ext=ext[ext.length-1]
     if(ext=='jpg'||ext=='jpeg'||ext=='png'||ext=='tiff')
@@ -539,19 +597,36 @@ function appendFileLeft(file_names)
     }
     else
     {
-      button=document.createElement("button")
+      check=false
+      divWrap=document.createElement("div")
+      div.appendChild(divWrap)
       icon=document.createElement("i")
-      icon.setAttribute("class","fa fa-download")
-      button.innerHTML='<i class="fa fa-download" aria-hidden="true"></i>'
-      button.setAttribute("style","width:40px;height:40px;float:right")
-      button.setAttribute("onclick","download('"+file_names[i]+"')")
+      icon.setAttribute("class","fa fa-download fa-sm")
+      icon.setAttribute("onclick","download('"+file_names[i]+"')")
+      icon.setAttribute("style","float:right;position:relative;margin-top:4px;cursor:pointer;")
       p=document.createElement("p")
       p.innerHTML=file_names[i]
-      p.setAttribute("style","float:left")
-      div.appendChild(p)
-      div.appendChild(button)
+      p.setAttribute("style","float:left;margin:auto;font-size:15px;color:white")
+      divWrap.appendChild(p)
+      divWrap.appendChild(icon)
+      div.style.backgroundColor="rgb(236,105,162)"
+      clearDiv=document.createElement("div")
+      clearDiv.setAttribute("style","clear:both;")
+      div.appendChild(clearDiv)
     }
+    div3=document.createElement("div")
+  div3.setAttribute("class","status-box")
+  div.appendChild(div3)
+  p2=document.createElement("p")
+  d=new Date()
+  d=d.toLocaleTimeString()
+  p2.innerHTML=d
+  p2.setAttribute("class","status-text")
+  div3.appendChild(p2)
+    index++;
   }
+  var element = document.getElementById("append-text");
+  element.scrollTop = element.scrollHeight - element.clientHeight;
 }
 
 function appendFileRight(file_names)

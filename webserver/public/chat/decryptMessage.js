@@ -14,7 +14,7 @@ function str2ab(str) {
   
 
 
-  function decryptMessage(content,uid,fid,i)
+function decryptMessage(content,uid,fid,i)
   {
     
     return new Promise((s,r)=>{

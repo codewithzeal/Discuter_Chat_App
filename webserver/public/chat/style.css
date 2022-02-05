@@ -101,24 +101,24 @@
 .chatMaterial-left
 {
     float:left;margin: 7px; clear: both;
-    background-color: rgb(236,105,162);overflow-y: hidden;padding: 0%; color: black;border-radius: 7%;
+    background-color: rgb(236,105,162);padding: 0%; color: black;border-radius: 7%;
     margin-bottom: 2px;
 }
 .chatMaterial-right
 {
     float:right;clear: both;margin: 7px;
-    background-color: rgb(236,105,162);overflow-y: hidden; padding: 0%; color: black;border-radius: 7%;
+    background-color: rgb(236,105,162); padding: 0%; color: black;border-radius: 7%;
       
 }
 .image-left
 {
     float:left;margin: 7px; clear: both;
-    background-color:rgb(50,143,168);padding:10px;border-radius:10%;
+    
 }
 .image-right
 {
     float:right;margin: 7px; clear: both;
-    background-color:rgb(50,143,168);padding:10px;border-radius:10%;
+    
 }
 #chatPane
 {
@@ -136,12 +136,12 @@
 .file-left
 {
     float:left;margin: 7px; clear: both;
-    background-color:rgb(50,143,168);padding:10px;border-radius:2%;
+    
 }
 .file-right
 {
     float:right;margin: 7px; clear: both;
-    background-color:rgb(50,143,168);padding:10px;border-radius:2%;
+    
 }
 
 .modal {
