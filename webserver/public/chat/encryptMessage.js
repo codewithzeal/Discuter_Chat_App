@@ -8,13 +8,7 @@ function _base64ToArrayBuffer(base64) {
       }
       s(bytes.buffer)
     })
-  }
-  
-  
-  function ab2b64(arrayBuffer) {
-    return window.btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer)));
-  }
-  
+  }  
   function getMessageEncoding(content) {
     let message = content;
     let enc = new TextEncoder();
@@ -40,7 +34,7 @@ function _base64ToArrayBuffer(base64) {
     })
     
   }
-  function encryptMessage(content,fid)
+  async function encryptMessage(content,fid)
   {
     return new Promise((s,r)=>{
       key=localStorage.getItem(uid+fid)
@@ -58,9 +52,10 @@ function _base64ToArrayBuffer(base64) {
           key,
           encoded
         ).then((data)=>{
-          s(ab2b64(data))
+          s(_arrayBufferToBase64(data))
         }).catch((err)=>{
           alert("encrypt hi nhi kar rha")
+          console.log(err)
         });
     
       }).catch((err)=>{

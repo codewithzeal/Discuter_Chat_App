@@ -6,7 +6,7 @@ function str2ab(str) {
     }
     return buf;
   }
-  function b642ab(base64string){
+  async function b642ab(base64string){
     return Uint8Array.from(window.atob(base64string), c => c.charCodeAt(0));
   }
   
@@ -14,15 +14,15 @@ function str2ab(str) {
   
 
 
-function decryptMessage(content,uid,fid,i)
+async function decryptMessage(content,uid,fid,i)
   {
     
-    return new Promise((s,r)=>{
+    return new Promise(async (s,r)=>{
         key=localStorage.getItem(uid+fid)
     
-        importKey(key).then((key)=>{
+        importKey(key).then(async (key)=>{
            
-          let encoded = b642ab(content);
+          let encoded = await b642ab(content);
           //iv = window.crypto.getRandomValues(new Uint8Array(12));
           window.crypto.subtle.decrypt(
             {

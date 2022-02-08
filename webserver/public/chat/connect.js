@@ -6,6 +6,7 @@ attachment=false
 file=""
 current_person=""
 file_arr=new Array()
+file_arr_preview=new Array()
 imgs=[]
 c=0
 size=0
@@ -13,6 +14,7 @@ fetched={}
 var resultV
 var current_post
 data_to_send=[]
+extension=[]
 index=0
 var span = document.getElementsByClassName("close")[c];
 
@@ -163,6 +165,7 @@ function setCurrentName(fid,val)
     if(a=="red")
     document.getElementById(fid).style.backgroundColor="lightgreen";
   }
+  if(val!="true")
   getChats()
   }
 }
@@ -304,7 +307,7 @@ async function decryptChats(response,uid,fid)
     var i
     for(i=0;i<response.length;i++){
     if(response[i].text)
-    await decryptMessage(response[i].text,uid,fid,i).then((data)=>{
+    decryptMessage(response[i].text,uid,fid,i).then((data)=>{
      response[data.index].text=data.data
     })
   }
@@ -345,7 +348,7 @@ function getChats()
     success:function(response)
     {
       document.getElementById("loadingModal").style.display="none"
-      decryptChats(response,uid,current_person).then((data)=>{
+       decryptChats(response,uid,current_person).then((data)=>{
           appendChats(response)
       })
     }
@@ -364,13 +367,15 @@ async function _arrayBufferToBase64( buffer ) {
   for (var i = 0; i < v.length; i++) {
     binary += String.fromCharCode( v[ i ] );
 }
-  return window.btoa(binary);
+  return new Promise((s,r)=>{
+    s(window.btoa(binary))
+  })
 }
 
 async function appendChats(result)
 {
   resultV=result
-  console.log(result)
+  //console.log(result)
   dir=""
   var i
   document.getElementById("append-text").innerHTML=""
@@ -378,6 +383,7 @@ async function appendChats(result)
   {
     document.getElementById("append-text").innerHTML="";
   }
+  console.log(result.length)
   for(i=0;i<result.length;i++)
   {
     check=true
@@ -408,10 +414,15 @@ async function appendChats(result)
           {
             img=document.createElement("img")
             img.setAttribute("style","width:250px;height:250px;margin:0px")
-            div.appendChild(img)
-            await _arrayBufferToBase64(result[i].ImageBlob.data).then((data)=>{
-              img.src=result[i].extension+data
-            })
+             await _arrayBufferToBase64(result[i].ImageBlob.data).then(async(data1)=>{
+               await decryptMessage(data1,uid,current_person,0).then(async(data)=>{
+                  div.appendChild(img)
+                  //console.log(result)
+                  img.src=result[i].extension+data.data
+                  return true;
+                })
+                return true;
+              })
           }
           else
           {
@@ -476,35 +487,46 @@ for(i=0;i<files.length;)
 {
   
   objects[i].readAsDataURL(files[i]);
-  objects[i].onload=e=>
+  objects[i].onload=async (e)=>
   {
     c=objects.indexOf(e.target)
     cnt++;
-    file_arr[c]=e.target.result.toString()
-    names[c]=files[c].name
-    ext=names[c].split(".")
-    ext=ext[ext.length-1]
-    if(ext=='jpg'||ext=='jpeg'||ext=='png'||ext=='tiff')
-    {
-      temp={
-        append:"no",
-        src:file_arr[c]
+    a=e.target.result.toString()
+    file_arr_preview[c]=a
+    a=a.substring(a.indexOf(',')+1)
+    //console.log(a)
+    await encryptMessage(a,current_person).then((data)=>{
+      console.log(data)
+      file_arr[c]=data
+      names[c]=files[c].name
+      ext=names[c].split(".")
+      ext=ext[ext.length-1]
+      bext=e.target.result.toString()
+      bext=bext.substr(0,bext.indexOf(',')+1)
+      extension[c]=bext
+      if(ext=='jpg'||ext=='jpeg'||ext=='png'||ext=='tiff')
+      {
+        temp={
+          append:"no",
+          src:file_arr[c]
+        }
+        data_to_send.push(temp)
       }
-      data_to_send.push(temp)
-    }
-    else
-    {
-      temp={
-        append:"yes",
-        data:names[c]
+      else
+      {
+        temp={
+          append:"yes",
+          data:names[c]
+        }
+        data_to_send.push(temp)
       }
-      data_to_send.push(temp)
-    }
-    if(cnt==files.length)
-    {
-      previewIt(file_arr,names)
-      document.getElementById("file-attachment").value=''
-    }
+      if(cnt==files.length)
+      {
+        previewIt(file_arr_preview,names)
+        document.getElementById("file-attachment").value=''
+      }
+    })
+   
   }
   i++;
 }
@@ -579,6 +601,7 @@ async function filePost()
   fd.append('files',dict)
   fd.append('fname',filecc)
   fd.append('size',size)
+  fd.append('extensions',JSON.stringify(extension))
   var xhr1=$.ajax({
 
     xhr: function() {
@@ -615,11 +638,12 @@ async function filePost()
   }).done(response=>{
     if(response=="ok"){
       
-    appendFileLeft(file_arr,filec).then((data)=>{
+    appendFileLeft(file_arr_preview,filec).then((data)=>{
       file_arr=[]
       imgs=[]
       data_to_send=[]
       size=0
+      file_arr_preview=[]
       file_data={
       files:filec,
       send:uid,
@@ -712,7 +736,7 @@ async function appendFileLeft(file_value,file_names)
   return true
 }
 
-function appendFileRight(file_names)
+async function appendFileRight(file_names)
 {
   
   for(i=0;i<file_names.length;i++)
@@ -725,8 +749,10 @@ function appendFileRight(file_names)
     {
       img=document.createElement("img")
       img.setAttribute("style","width:250px;height:250px;margin:0px")
-      div.appendChild(img)
-      img.src=file_names[i].src
+      await decryptMessage(file_names[i].src,uid,current_person,0).then((data)=>{
+        div.append(img)
+        img.src=data.data
+      })
     }
     else
     {

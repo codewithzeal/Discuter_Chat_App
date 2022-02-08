@@ -17,8 +17,9 @@ app.post('/filePost',(req,res)=>{
         size=fields['size']
         fname=JSON.parse(fields['fname'])
         files=JSON.parse(fields['files'])
+        extensions=JSON.parse(fields['extensions'])
 
-        makefile(baseImage,send,recv,fname,files)
+        makefile(baseImage,send,recv,fname,files,extensions)
         //console.log(fname)
        /*  query="insert into messages('sender_id','receiver_id','attachment')values('"+fields.sender+"','"+fields.recv+"','"+val+"');"
       sql.query(query,(err,result)=>{
@@ -67,7 +68,7 @@ function updateLimit()
         if(err) throw err
     })
 }
-async function makefile(baseImage,send,recv,fname,files)
+async function makefile(baseImage,send,recv,fname,files,extensions)
 {
 
     await checkLimit().then((status)=>{
@@ -80,12 +81,12 @@ async function makefile(baseImage,send,recv,fname,files)
             val=[]
             ext=files[i].indexOf(',')
             ext=files[i].substr(0,ext+1)
-            await removeDirt(files[i]).then((data)=>{
-                binData= b642ab(data).then((ab)=>{
+            
+                await b642ab(files[i]).then((ab)=>{
                     val.push(send)
                     val.push(recv)
                     val.push(fname[i])
-                    val.push(ext)
+                    val.push(extensions[i])
                     val.push(ab)
                     vals.push(val)
                     ext=fname[i].split('.')
@@ -105,7 +106,7 @@ async function makefile(baseImage,send,recv,fname,files)
                     })
                 })
                
-            })
+           
             
            
         }
