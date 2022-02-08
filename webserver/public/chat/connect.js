@@ -10,8 +10,13 @@ imgs=[]
 c=0
 size=0
 fetched={}
+var resultV
+var current_post
+data_to_send=[]
 index=0
 var span = document.getElementsByClassName("close")[c];
+
+
 span.onclick = function() {
   modal.style.display = "none";
 }
@@ -205,7 +210,15 @@ else
 }
 })
 socket.on("receive-files",(data)=>{
-  appendFileRight(data)
+  if(current_person==data.giverId){
+  appendFileRight(data.data)
+a=document.getElementById('append-text')
+a.scrollTop=a.scrollHeight-a.clientHeight  
+}
+else
+{
+  document.getElementById(data.giverId).style.backgroundColor="red";
+}
 })
 
 function createBox(data,div)
@@ -305,6 +318,23 @@ function getChats()
   return
   result=""
   $.ajax({
+    xhr: function() {
+      var xhr = new window.XMLHttpRequest();
+      xhr.upload.addEventListener("progress", function(evt) {
+          if (evt.lengthComputable) {
+              var percentComplete = evt.loaded / evt.total;
+              //Do something with upload progress here
+          }
+     }, false);
+
+     xhr.addEventListener("progress", function(evt) {
+         if (evt.lengthComputable) {
+             
+         }
+     }, false);
+
+     return xhr;
+  },
     url:'/getChats',
     method:"POST",
     contentType:'application/json',
@@ -314,6 +344,7 @@ function getChats()
     }),
     success:function(response)
     {
+      document.getElementById("loadingModal").style.display="none"
       decryptChats(response,uid,current_person).then((data)=>{
           appendChats(response)
       })
@@ -322,10 +353,24 @@ function getChats()
 }
 
 
-function appendChats(result)
+function download(id)
 {
-  
-  
+
+}
+
+async function _arrayBufferToBase64( buffer ) {
+  v=new Uint8Array(buffer)
+  var binary=''
+  for (var i = 0; i < v.length; i++) {
+    binary += String.fromCharCode( v[ i ] );
+}
+  return window.btoa(binary);
+}
+
+async function appendChats(result)
+{
+  resultV=result
+  console.log(result)
   dir=""
   var i
   document.getElementById("append-text").innerHTML=""
@@ -362,9 +407,11 @@ function appendChats(result)
           if(ext=='jpg'||ext=='jpeg'||ext=='png'||ext=='tiff')
           {
             img=document.createElement("img")
-            img.setAttribute("src",'/'+result[i].attachment)
             img.setAttribute("style","width:250px;height:250px;margin:0px")
             div.appendChild(img)
+            await _arrayBufferToBase64(result[i].ImageBlob.data).then((data)=>{
+              img.src=result[i].extension+data
+            })
           }
           else
           {
@@ -373,7 +420,7 @@ function appendChats(result)
             div.appendChild(divWrap)
             icon=document.createElement("i")
             icon.setAttribute("class","fa fa-download fa-sm")
-            icon.setAttribute("onclick","download('"+result[i].attachment+"')")
+            icon.setAttribute("onclick","download('"+result[i].message_id+"')")
             icon.setAttribute("style","float:right;position:relative;margin-top:4px;cursor:pointer;")
             p=document.createElement("p")
             p.innerHTML=result[i].attachment
@@ -408,6 +455,8 @@ function appendChats(result)
         div3.appendChild(p2)
         
   }
+  a=document.getElementById('append-text')
+  a.scrollTop=a.scrollHeight-a.clientHeight
   index=i
 }
 function doUpload()
@@ -423,45 +472,44 @@ function doUpload()
     objects.push(new FileReader())
     size+=files[i].size
 }
+for(i=0;i<files.length;)
+{
   
-$.ajax(
-  { 
-    url:"/checkLimit",
-    method:"POST",
-    contentType:"application/json",
-    data:JSON.stringify({
-      sz:size,
-      user:uid
-    }),
-    success:function(response)
+  objects[i].readAsDataURL(files[i]);
+  objects[i].onload=e=>
+  {
+    c=objects.indexOf(e.target)
+    cnt++;
+    file_arr[c]=e.target.result.toString()
+    names[c]=files[c].name
+    ext=names[c].split(".")
+    ext=ext[ext.length-1]
+    if(ext=='jpg'||ext=='jpeg'||ext=='png'||ext=='tiff')
     {
-      if(response=="ok")
-      {
-        for(i=0;i<files.length;)
-        {
-          objects[i].readAsDataURL(files[i]);
-          objects[i].onload=e=>
-          {
-            c=objects.indexOf(e.target)
-            cnt++;
-            file_arr[c]=e.target.result.toString()
-            names[c]=files[c].name
-            if(cnt==files.length)
-            {
-              previewIt(file_arr,names)
-              document.getElementById("file-attachment").value=''
-            }
-          }
-          i++;
-        }
+      temp={
+        append:"no",
+        src:file_arr[c]
       }
-      else
-      {
-        alert("sorry limit reached")
+      data_to_send.push(temp)
+    }
+    else
+    {
+      temp={
+        append:"yes",
+        data:names[c]
       }
+      data_to_send.push(temp)
+    }
+    if(cnt==files.length)
+    {
+      previewIt(file_arr,names)
+      document.getElementById("file-attachment").value=''
     }
   }
-)
+  i++;
+}
+
+}
 
 function previewIt(file_urls,file_heads)
 {
@@ -478,11 +526,48 @@ function previewIt(file_urls,file_heads)
     document.getElementById("img").src="/abcd.jpg"
 }
 
+async function loadBar()
+{
+  var modal = document.createElement("div")
+  modal.setAttribute("id","serverUploadProgress")
+  document.getElementById("body").appendChild(modal)
+  div=document.createElement("div")
+  pdiv=document.createElement("div")
+  pdiv.setAttribute("style","width:50vw;margin: auto;position: absolute;top:50%;left: 25%;")
+  pdiv.setAttribute("class","progress")
+  pdiv.setAttribute("id","parrent-bar")
+  modal.appendChild(pdiv)
+  div.setAttribute("class","progress-bar bg-warning")
+  div.setAttribute("role","progressbar")
+  div.setAttribute("aria-valuenow","0")
+  div.setAttribute("aria-valuemin","0")
+  div.setAttribute("aria-valuemax","100")
+  div.setAttribute("style","width:0%")
+  div.setAttribute("id","theprogressbar")
+  pdiv.append(div)
+  button=document.createElement("button")
+  button.setAttribute("class","btn btn-danger")
+  button.innerHTML="Cancel"
+  button.setAttribute("onclick","cancelCurrentPost()")
+  button.setAttribute("style","margin: auto;position: absolute;top:53%;left: 25%;")
+  modal.appendChild(button)
+  return "done"
 }
-function filePost()
+
+function cancelCurrentPost()
+{
+  current_post.abort()
+  modal=document.getElementById("myModal")
+  modal.style.display="none"
+}
+
+async function filePost()
 {
   var modal = document.getElementById("myModal");
   modal.style.display = "none";
+  loadBar()
+  var modal=document.getElementById("serverUploadProgress")
+  div=document.getElementById("theprogressbar")
   dict=file_arr
   filec=imgs
   document.getElementById("file-attachment").files=null
@@ -493,14 +578,22 @@ function filePost()
   fd.append('recv',current_person)
   fd.append('files',dict)
   fd.append('fname',filecc)
-  $.ajax({
+  fd.append('size',size)
+  var xhr1=$.ajax({
 
     xhr: function() {
       var xhr = new window.XMLHttpRequest();
       xhr.upload.addEventListener("progress", function(evt) {
           if (evt.lengthComputable) {
+              console.log("yaha")
               var percentComplete = evt.loaded / evt.total;
-              //do your thing or what not
+              newprogress=percentComplete*100
+              div.style.width=newprogress+"%"
+              div.setAttribute("aria-valuenow",newprogress)
+              if(newprogress>=100){
+              modal.remove()
+            }
+
           }
      }, false);
 
@@ -521,45 +614,32 @@ function filePost()
     data:fd,
   }).done(response=>{
     if(response=="ok"){
-      updateLimit()
       
-      appendFileLeft(filec)
-      
+    appendFileLeft(file_arr,filec).then((data)=>{
+      file_arr=[]
+      imgs=[]
+      data_to_send=[]
+      size=0
       file_data={
-        files:filec,
-        send:uid,
-        recv:current_person
-      }
-      socket.emit("send-files",file_data)
+      files:filec,
+      send:uid,
+      recv:current_person
+}
+socket.emit("send-files",{recv:current_person,data: data_to_send,giverId:uid})
+    })
+     
   }
+  else if(response=="lr")
+  alert("space limit reached sorry")
     else
     alert("error")
 
     imgs=[]
     file_arr=[]
   })
+  current_post=xhr1
 }
 
-function updateLimit()
-{
-  $.ajax({
-    url:'/updateLimit',
-    method:'POST',
-    contentType:'application/json',
-    data:JSON.stringify({
-      sz:size,
-      user:uid
-    }),
-    success:function(response)
-    {
-        size=0;
-    },
-    error:function(response)
-    {
-      alert("error in updating limit")
-    }
-  })
-}
 
 function cancelUpload()
 {
@@ -575,7 +655,7 @@ function openup()
   document.getElementById("file-attachment").click()
 }
 
-function appendFileLeft(file_names)
+async function appendFileLeft(file_value,file_names)
 {
   
   for(i=0;i<file_names.length;i++)
@@ -591,9 +671,11 @@ function appendFileLeft(file_names)
     if(ext=='jpg'||ext=='jpeg'||ext=='png'||ext=='tiff')
     {
       img=document.createElement("img")
-      img.setAttribute("src",'/'+file_names[i])
-      img.setAttribute("style","width:250px;height:250px;margin:0px")
+      img.setAttribute("id",'img'+index)
       div.appendChild(img)
+      document.getElementById("img"+index).src=file_value[i]
+      img.setAttribute("style","width:250px;height:250px;margin:0px")
+      
     }
     else
     {
@@ -615,18 +697,19 @@ function appendFileLeft(file_names)
       div.appendChild(clearDiv)
     }
     div3=document.createElement("div")
-  div3.setAttribute("class","status-box")
-  div.appendChild(div3)
-  p2=document.createElement("p")
-  d=new Date()
-  d=d.toLocaleTimeString()
-  p2.innerHTML=d
-  p2.setAttribute("class","status-text")
-  div3.appendChild(p2)
+    div3.setAttribute("class","status-box")
+    div.appendChild(div3)
+    p2=document.createElement("p")
+    d=new Date()
+    d=d.toLocaleTimeString()
+    p2.innerHTML=d
+    p2.setAttribute("class","status-text")
+    div3.appendChild(p2)
     index++;
   }
   var element = document.getElementById("append-text");
   element.scrollTop = element.scrollHeight - element.clientHeight;
+  return true
 }
 
 function appendFileRight(file_names)
@@ -638,29 +721,41 @@ function appendFileRight(file_names)
     div=document.createElement("div")
     div.setAttribute("class","file-right")
     document.getElementById("append-text").appendChild(div)
-    ext=file_names[i].split(".")
-    ext=ext[ext.length-1]
-    if(ext=='jpg'||ext=='jpeg'||ext=='png'||ext=='tiff')
+    if(file_names[i].append=="no")
     {
       img=document.createElement("img")
-      img.setAttribute("src",'/'+file_names[i])
       img.setAttribute("style","width:250px;height:250px;margin:0px")
       div.appendChild(img)
+      img.src=file_names[i].src
     }
     else
     {
-      button=document.createElement("button")
+      divWrap=document.createElement("div")
+      div.appendChild(divWrap)
       icon=document.createElement("i")
-      icon.setAttribute("class","fa fa-download")
-      button.innerHTML='<i class="fa fa-download" aria-hidden="true"></i>'
-      button.setAttribute("style","width:40px;height:40px;float:right")
-      button.setAttribute("onclick","download('"+file_names[i]+"')")
+      icon.setAttribute("class","fa fa-download fa-sm")
+      icon.setAttribute("onclick","download('"+file_names[i].data+"')")
+      icon.setAttribute("style","float:right;position:relative;margin-top:4px;cursor:pointer;")
       p=document.createElement("p")
-      p.innerHTML=file_names[i]
-      p.setAttribute("style","float:left")
-      div.appendChild(p)
-      div.appendChild(button)
+      p.innerHTML=file_names[i].data
+      p.setAttribute("style","float:left;margin:auto;font-size:15px;color:white")
+      divWrap.appendChild(p)
+      divWrap.appendChild(icon)
+      div.style.backgroundColor="rgb(236,105,162)"
+      clearDiv=document.createElement("div")
+      clearDiv.setAttribute("style","clear:both;")
+      div.appendChild(clearDiv)
     }
+    div3=document.createElement("div")
+    div3.setAttribute("class","status-box")
+    div.appendChild(div3)
+    p2=document.createElement("p")
+    d=new Date()
+    d=d.toLocaleTimeString()
+    p2.innerHTML=d
+    p2.setAttribute("class","status-text")
+    div3.appendChild(p2)
+    index++;
   }
 }
 

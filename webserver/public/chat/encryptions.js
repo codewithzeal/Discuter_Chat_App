@@ -8,7 +8,12 @@ function str2ab(str) {
   }
   
   function ab2b64(arrayBuffer) {
-    return window.btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer)));
+    v=new Uint8Array(arrayBuffer)
+    var binary=''
+    for (var i = 0; i < v.length; i++) {
+      binary += String.fromCharCode( v[ i ] );
+  }
+    return window.btoa(binary);
   }
   
   function encryptKeys(content,toid)

@@ -24,20 +24,32 @@
   </script>
 </head>
 
-<body>
+<body id="body">
 
+
+<!--Loading animation-->
+<div  id="loadingModal" style="padding: 0%;margin: 0%;">
+  <div class="container-fluid pb-2" >
+
+    <div class="row" style="height: 10vh;background-color: rgb(32, 76, 170);margin: 0%;padding: 0%;" id="navbar">
+      <img src="/icon.jpg" style="height: 10vh;margin: 0%;float: left;">
+    </div>
+
+</div>
+<p style="position: absolute;top: 50%;left:25vw;margin: 0%;width: 50vw;text-align: center;">Loading chats...</p>
+</div>
 
 <div class="container-fluid pb-2" >
 
-    <div class="row" style="height: 10vh;background-color: rgb(32, 76, 170);" id="navbar">
-      ye hai
+    <div class="row" style="height: 10vh;background-color: rgb(32, 76, 170);margin: 0%;padding: 0%;" id="navbar">
+      <img src="/icon.jpg" style="height: 10vh;margin: 0%;float: left;">
     </div>
 
 </div>
 <!-- Entire content-->    
-<div class="container-fluid">
+<div class="container-fluid mt-3">
   <div class="row" id="origin">
-    <div class="col-sm-3" id="contactOrigin">
+    <div class="col-sm-3 mr-3" id="contactOrigin">
     
   <!--This is add user area-->    
   <div class="main" id="addUserBox">
@@ -83,9 +95,9 @@
 
     <!--This is the entire chat pane-->
 
-    <div class="col-sm-8" id="chatPane">
-      <div class="row" style="background-color:yellow;width: 100%;margin: 0%;padding: 0%;height: 6vh;position:sticky;top: 0%;">
-        <div class="col-sm-12" style="background-color:rgb(255, 255, 255);" id="chatee"></div>
+    <div class="col-sm-8 mr-3" id="chatPane">
+      <div class="row" style="width: 100%;margin: 0%;padding: 0%;height: 8vh;position:sticky;top: 0%;">
+        <div class="col-sm-12" style="background-color:rgb(116, 196, 243);border: 2px solid rgb(230, 114, 119);border-bottom: 2px solid rgb(230, 114, 119);border-top-left-radius: 12px;border-top-right-radius: 12px;margin: 0%;top:0px;position: relative;font-weight: bolder;font-size: larger;" id="chatee"></div>
       </div>
       <div id="append-text" style="overflow-y: auto;height: 78%;padding: 20px;margin: 0%;">
       

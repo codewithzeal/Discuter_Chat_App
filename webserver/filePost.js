@@ -1,4 +1,5 @@
 var express=require('express')
+window=require('buffer')
 var app=express.Router()
 var sql=require('./getSql')
 fs = require('fs');
@@ -13,6 +14,7 @@ app.post('/filePost',(req,res)=>{
         baseImage=fields['file']
         send=fields['sender']
         recv=fields['recv']
+        size=fields['size']
         fname=JSON.parse(fields['fname'])
         files=JSON.parse(fields['files'])
 
@@ -28,33 +30,87 @@ app.post('/filePost',(req,res)=>{
       }) */
         
   })
-function makefile(baseImage,send,recv,fname,files)
+
+async function removeDirt(val)
 {
-   vals=[]
-    const localPath = `F:/BakBak/webserver/uploads/`;
+    index=val.indexOf(',')
+    val=val.substring(index+1)
+    return val
+}
+
+async function b642ab(base64string){
+    return Buffer.from(base64string,'base64')
+  }
+
+function checkLimit()
+{
+    return new Promise((s,r)=>{
+        query="select size_used from users where uid='"+send+"';"
+        sql.query(query,(err,result)=>{
+        if(err)throw err
+        if((parseInt(result[0].size_used)+parseInt(size))>1024*1024*50){
+        s("not ok")
+    console.log("not ok")
+    }
+        else{
+        s("ok")
+        //updateSize(req.body.sz,req.body.user)
+        }
+    })
+    })
+}
+
+function updateLimit()
+{
+    query="update users set size_used=size_used+'"+size+"' where uid='"+send+"'"
+    sql.query(query,(err,result)=>{
+        if(err) throw err
+    })
+}
+async function makefile(baseImage,send,recv,fname,files)
+{
+
+    await checkLimit().then((status)=>{
+        if(status!="ok")
+        res.send("lr")
+    })
         for(i=0;i<files.length;i++)
         {
-            baseImage=files[i];
-             const ext = baseImage.substring(baseImage.indexOf("/")+1, baseImage.indexOf(";base64"));
-            const fileType = baseImage.substring("data:".length,baseImage.indexOf("/"));
-            const regex = new RegExp(`^data:${fileType}\/${ext};base64,`, 'gi');
-            const base64Data = baseImage.replace(regex, "");
-            const filename = fname[i];
-            fs.writeFileSync(localPath+filename, base64Data, 'base64'); 
+            vals=[]
             val=[]
-            val.push(send)
-            val.push(recv)
-            val.push(fname[i])
-            vals.push(val)
+            ext=files[i].indexOf(',')
+            ext=files[i].substr(0,ext+1)
+            await removeDirt(files[i]).then((data)=>{
+                binData= b642ab(data).then((ab)=>{
+                    val.push(send)
+                    val.push(recv)
+                    val.push(fname[i])
+                    val.push(ext)
+                    val.push(ab)
+                    vals.push(val)
+                    ext=fname[i].split('.')
+                    ext=ext[ext.length-1]
+                    if(ext=='jpg'||ext=='jpeg'||ext=='png'||ext=='tiff')
+                    query="insert into messages(sender_id,receiver_id,attachment,extension,ImageBlob) values ?;"
+                    else
+                    query="insert into messages(sender_id,receiver_id,attachment,extension,Fileblob) values ?;"
+                    sql.query(query,[vals],(err,result)=>{
+                        if(err)throw err
+                        else
+                        {
+                            console.log("here")
+                            res.end("ok")
+                            
+                        }
+                    })
+                })
+               
+            })
+            
+           
         }
-        query="insert into messages(sender_id,receiver_id,attachment) values ?;"
-      sql.query(query,[vals],(err,result)=>{
-          if(err)throw err
-          else
-          {
-              res.end("ok")
-          }
-      })
+        updateLimit()
+        
 }
 })
 module.exports=app
