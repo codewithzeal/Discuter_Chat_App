@@ -30,15 +30,18 @@ window.onclick = function(event) {
 }
 
 Intitialize();
-function Intitialize()
+async function Intitialize()
 {
 uid=getMyInfo()
-getMyContacts()
-socket.emit("new-user",uid)
+await getMyContacts()
+socket.emit("new-user",{con:contacts,uname:uid})
 }
 
 function getMyContacts()
 {
+  return new Promise((s,r)=>{
+
+  
   $.ajax({
     url:'/getUser',
     method:'POST',
@@ -48,15 +51,18 @@ function getMyContacts()
     contentType:'application/json',
     success: (response)=>{
       contacts=response
+      s()
       attachLists(contacts);
       getUsersOnline();
     }
   });
+})
+
 }
 
 function getUsersOnline()
 {
-  socket.emit("request-name")
+  socket.emit("request-name",contacts)
 }
 
 
@@ -151,7 +157,7 @@ function appendStatus(id)
   document.getElementById("status"+id).innerHTML=id+"(Online)";
 }
 socket.on("get-name",(u_online)=>{
-
+  
   users_online=new Set(u_online)
   setStatus();
 

@@ -6,17 +6,26 @@ const io = require('socket.io')(8000, {
 console.log("server is running")
 users_online=new Set();
 users_map={}
+contactsToClose={}
 io.on("connection",(socket)=>{
-    socket.on("request-name",()=>{
-    socket.emit("get-name",Array.from(users_online));
+    socket.on("request-name",(contacts)=>{
+    temp=[]
+    for(i=0;i<contacts.length;i++)
+    {
+      if(users_online.has(contacts[i].id1))
+      temp.push(contacts[i].id1)
+    }
+    socket.emit("get-name",Array.from(temp));
   })
 
   
-  socket.on("new-user",(uname)=>{
-      //console.log(name)
-      users_map[uname]=socket.id;
-      users_online.add(uname);
-      socket.broadcast.emit("add-me",uname);
+  socket.on("new-user",(data)=>{
+      contactsToClose[data.uname]=data.con
+      users_map[data.uname]=socket.id;
+      users_online.add(data.uname);
+      for(i=0;i<data.con.length;i++)
+      if(users_online.has(data.con[i].id1))
+      io.to(users_map[data.con[i].id1]).emit("add-me",data.uname)
     })
 
     socket.on("send-text",(data)=>{
@@ -33,9 +42,11 @@ io.on("connection",(socket)=>{
       for (var key in users_map) {
         var value = users_map[key];
         if(value==socket.id){
+
+        for(i=0;i<contactsToClose[key].length;i++)
+        io.to(users_map[contactsToClose[key][i].id1]).emit("remove-me",key)
         delete(users_map[key])
         users_online.delete(key)
-        socket.broadcast.emit("remove-me",key);
         break
         }
         
