@@ -9,7 +9,6 @@ file_arr=new Array()
 file_arr_preview=new Array()
 imgs=[]
 c=0
-size=0
 fetched={}
 var resultV
 var current_post
@@ -86,17 +85,24 @@ function addUser()
         alert("You are already freinds with him");
         else if(response=="invalid")
         alert("You cannot add yourself")
+        else if(response=="empty")
+        alert("Sorry some error 1 occured please send in details to: namangns1@gmail.com")
       }
   });
   }
 
+  }).catch((data)=>{
+    localStorage.removeItem(uid+fid)
   })
   
 }
 
 function attachLists(list)
 {
-  
+  if(!list.length){
+    document.getElementById("loadingModal").style.display="none"
+  return
+}
   current_person=list[0].id1;
   setCurrentName(current_person,'true')
   getChats()
@@ -119,8 +125,14 @@ function appendContact(f_id,status)
   else
   {
     loadKeys(uid,f_id).then((key)=>{
+      if(key){
       localStorage.setItem(uid+f_id,key)
       appendContact(f_id,status)
+      }
+      else
+      {
+        alert("key not found for contact "+f_id)
+      }
     })
   }
 }
@@ -184,6 +196,10 @@ function sendContent()
   if(!attachment)
   {
       var contentValue=document.getElementById("content").value.toString();
+      if(contentValue=='')
+      {
+        return
+      }
       contentValue=contentValue.replaceAll("<","&lt");
       contentValue=contentValue.replaceAll(">","&gt");
       message={
@@ -213,6 +229,7 @@ else
 }
 })
 socket.on("receive-files",(data)=>{
+  console.log(data)
   if(current_person==data.giverId){
   appendFileRight(data.data)
 a=document.getElementById('append-text')
@@ -290,9 +307,13 @@ function StoreMessage(texts,senders,receivers,checks,attachments)
       }),
       success:function(response)
       {
-        if(response!="ok")
+        if(response=="ok")
         {
-          alert("server error occured")
+          alert("error 2 occured please contact namangns1@gmail.com")
+        }
+        else if(response!="ok")
+        {
+          alert("server error occured 3")
         }
       }
     }
@@ -307,7 +328,7 @@ async function decryptChats(response,uid,fid)
     var i
     for(i=0;i<response.length;i++){
     if(response[i].text)
-    decryptMessage(response[i].text,uid,fid,i).then((data)=>{
+    await decryptMessage(response[i].text,uid,fid,i).then((data)=>{
      response[data.index].text=data.data
     })
   }
@@ -347,10 +368,16 @@ function getChats()
     }),
     success:function(response)
     {
+      if(response=="empty")
+      {
+        alert("error 4 occurred please send in details to namangns1@gmail.com")
+      }
+      else{
       document.getElementById("loadingModal").style.display="none"
        decryptChats(response,uid,current_person).then((data)=>{
           appendChats(response)
       })
+    }
     }
   })
 }
@@ -481,7 +508,6 @@ function doUpload()
   objects=[]
   for(i=0;i<files.length;i++){
     objects.push(new FileReader())
-    size+=files[i].size
 }
 for(i=0;i<files.length;)
 {
@@ -496,7 +522,6 @@ for(i=0;i<files.length;)
     a=a.substring(a.indexOf(',')+1)
     //console.log(a)
     await encryptMessage(a,current_person).then((data)=>{
-      console.log(data)
       file_arr[c]=data
       names[c]=files[c].name
       ext=names[c].split(".")
@@ -508,7 +533,8 @@ for(i=0;i<files.length;)
       {
         temp={
           append:"no",
-          src:file_arr[c]
+          src:file_arr[c],
+          ext:extension[c]
         }
         data_to_send.push(temp)
       }
@@ -600,7 +626,6 @@ async function filePost()
   fd.append('recv',current_person)
   fd.append('files',dict)
   fd.append('fname',filecc)
-  fd.append('size',size)
   fd.append('extensions',JSON.stringify(extension))
   var xhr1=$.ajax({
 
@@ -636,9 +661,15 @@ async function filePost()
     processData:false,
     data:fd,
   }).done(response=>{
-    if(response=="ok"){
+    if(response=="empty")
+    {
+      alert("error 5 occured send in your complaint to namangns1@gmail.com")
+    }
+    else if(response=="ok"){
       
     appendFileLeft(file_arr_preview,filec).then((data)=>{
+       
+      socket.emit("send-files",{recv:current_person,data: data_to_send,giverId:uid})
       file_arr=[]
       imgs=[]
       data_to_send=[]
@@ -648,8 +679,7 @@ async function filePost()
       files:filec,
       send:uid,
       recv:current_person
-}
-socket.emit("send-files",{recv:current_person,data: data_to_send,giverId:uid})
+      }
     })
      
   }
@@ -751,7 +781,7 @@ async function appendFileRight(file_names)
       img.setAttribute("style","width:250px;height:250px;margin:0px")
       await decryptMessage(file_names[i].src,uid,current_person,0).then((data)=>{
         div.append(img)
-        img.src=data.data
+        img.src=file_names[i].ext+data.data
       })
     }
     else

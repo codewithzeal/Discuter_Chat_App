@@ -12,9 +12,12 @@ app.get('/login',(req,res)=>{
 app.post('/login',(req,res)=>{
 uid=req.body.uid;
 password=req.body.password;
+val=[]
+val.push(uid)
+val.push(password)
 var flag=0;
-var query="select * from users where uid='"+uid+"' and password='"+password+"'";
-sql.query(query,(err,result)=>{
+var query="select * from `users` where `uid`=? and `password`=?";
+sql.execute(query,val,(err,result)=>{
     if(err)
     {
         console.log(err.message);

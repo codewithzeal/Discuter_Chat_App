@@ -9,15 +9,26 @@ app.get('/home',(req,res)=>{
     res.render('signup.ejs')
 })
 app.post('/signup',(req,res)=>{
-    uname=req.body.un,
-    password=req.body.pwd,
-    query="insert into users(uid,password)VALUES('"+uname+"','"+password+"');"
-    query1="select * from users where uid='"+uname+"';"
-    sql.query(query1,(err,result)=>{
+    uname=req.body.un
+    password=req.body.pwd
+    if(!uname||!password)
+    {
+        res.send("empty")
+    }
+    else{
+        val0=[]
+        val1=[]
+        val0.push(uname)
+        val0.push(password)
+        val1.push(uname)
+
+    query="insert into users(uid,password) values (?,?);"
+    query1="select * from `users` where `uid`=?;"
+    sql.execute(query1,val1,(err,result)=>{
         if(err) throw result
         if(!result.length)
         {
-            sql.query(query,(err,result)=>{
+            sql.execute(query,val0,(err,result)=>{
                 if(err) throw err
                 else
                 {
@@ -30,6 +41,6 @@ app.post('/signup',(req,res)=>{
             res.send("ae")
         }
     })
-    
+}
 })
 module.exports=app

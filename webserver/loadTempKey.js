@@ -7,8 +7,16 @@ var sql=require('./getSql')
 app.post('/getTempKeys',(req,res)=>{
     uid=req.body.uid
     f_id=req.body.f_id
-    var query="select sno,temp_key from contacts where (c_id='"+uid+"' and f_id='"+f_id+"') or (c_id='"+f_id+"' and f_id='"+uid+"');"
-    sql.query(query,(err,result)=>{
+    if(!uid||!f_id)
+    res.send("empty")
+    else{
+    val=[]
+    val.push(uid)
+    val.push(f_id)
+    val.push(f_id)
+    val.push(uid)
+    var query="select sno,temp_key from contacts where (c_id=? and f_id=?) or (c_id=? and f_id=?);"
+    sql.query(query,val,(err,result)=>{
         if(err) throw err
         else
         {
@@ -19,5 +27,6 @@ app.post('/getTempKeys',(req,res)=>{
             })
         }
     })
+}
 })
 module.exports=app

@@ -4,9 +4,18 @@ app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 var sql=require('./getSql.js')
 app.post('/getPublicKey',(req,res)=>{
+    
     id=req.body.id
-    query="select publicKey from users where uid='"+id+"';"
-    sql.query(query,(err,result)=>{
+    if(!id)
+    res.send("empty")
+    else
+    {
+        
+    valt=[]
+    valt.push(id)
+    query="select publicKey from users where `uid`=?;"
+    sql.execute(query,valt,(err,result)=>{
+        
         if(err)
         {
             res.send({status:"nok"})
@@ -14,13 +23,20 @@ app.post('/getPublicKey',(req,res)=>{
         else
         {
             //console.log(result[0].publicKey,id)
-            val={
-                    status:"ok",
-                    pubKey:result[0].publicKey
+            if(result.length!=0){
+                        val={
+                            status:"ok",
+                            pubKey:result[0].publicKey
+                    }
+                    res.send(val)
+                }
+            else
+            {
+                console.log(result)
+                res.send({status:"ne"})
             }
-            res.send(val)
         }
     })
-
+    }
 })
 module.exports=app

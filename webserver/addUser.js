@@ -7,31 +7,47 @@ app.use(express.json())
 app.post('/addUser',(req,res)=>{
     var fid=req.body.f_id;
     var uid=req.body.uid;
+    if(!fid||!uid)
+    {
+        res.send("empty error")
+    }
     if(fid==uid)
     {
         res.send("invalid");
         return;
     }
-    var querry1="select uid from users where uid='"+fid+"'";
-    var queery2="select sno from contacts where c_id='"+fid+"' and f_id='"+uid+"' or c_id='"+uid+"' and f_id='"+fid+"'"
-    var querry3="insert into contacts(c_id,f_id,temp_key)values('"+uid+"','"+fid+"','"+req.body.temp_key+"')";
+    val1=[]
+    val2=[]
+    val3=[]
+    val1.push(fid)
+    val2.push(fid)
+    val2.push(uid)
+    val2.push(uid)
+    val2.push(fid)
+    val3.push(uid)
+    val3.push(fid)
+    val3.push(req.body.temp_key)
+    var querry1="select uid from users where `uid`=?";
+    var queery2="select sno from contacts where c_id=? and f_id=? or c_id=? and f_id=?"
+    var querry3="insert into contacts(c_id,f_id,temp_key)values (?,?,?)";
     var flag=0
-    sql.query(querry1,(err,result)=>{
+    sql.execute(querry1,val1,(err,result)=>{
+        console.log("here is the result",0)
         if(err) 
         {
             throw err;
         }
         if(result.length==0)
         {
-            console.log(result)
+            console.log("hmm")
             res.send("N");
         }
         else
         {
-            sql.query(queery2,(err,result)=>{
+            sql.execute(queery2,val2,(err,result)=>{
                 if(!result.length)
                 {
-                    sql.query(querry3,(err,result)=>{
+                    sql.execute(querry3,val3,(err,result)=>{
                         if(err)throw err;
                         else
                         res.send("OK")

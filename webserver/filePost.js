@@ -14,11 +14,15 @@ app.post('/filePost',(req,res)=>{
         baseImage=fields['file']
         send=fields['sender']
         recv=fields['recv']
-        size=fields['size']
+        size=0
         fname=JSON.parse(fields['fname'])
         files=JSON.parse(fields['files'])
         extensions=JSON.parse(fields['extensions'])
-
+        if(!send||!recv||!fname||!files||!extensions)
+        {
+            res.send("empty")
+        }
+        else
         makefile(baseImage,send,recv,fname,files,extensions)
         //console.log(fname)
        /*  query="insert into messages('sender_id','receiver_id','attachment')values('"+fields.sender+"','"+fields.recv+"','"+val+"');"
@@ -32,12 +36,7 @@ app.post('/filePost',(req,res)=>{
         
   })
 
-async function removeDirt(val)
-{
-    index=val.indexOf(',')
-    val=val.substring(index+1)
-    return val
-}
+
 
 async function b642ab(base64string){
     return Buffer.from(base64string,'base64')
@@ -49,7 +48,7 @@ function checkLimit()
         query="select size_used from users where uid='"+send+"';"
         sql.query(query,(err,result)=>{
         if(err)throw err
-        if((parseInt(result[0].size_used)+parseInt(size))>1024*1024*50){
+        if((parseInt(result[0].size_used)+parseInt(size))>1024*1024*10){
         s("not ok")
     console.log("not ok")
     }
@@ -71,16 +70,23 @@ function updateLimit()
 async function makefile(baseImage,send,recv,fname,files,extensions)
 {
 
-    await checkLimit().then((status)=>{
-        if(status!="ok")
-        res.send("lr")
-    })
+
         for(i=0;i<files.length;i++)
         {
+            flag=0
+            size+=files[i].length*(3/4)
+            await checkLimit().then((status)=>{
+                if(status!="ok"){
+                res.send("lr")
+                    flag=1
+            }
+            })
+            if(flag==1)
+            return
             vals=[]
             val=[]
-            ext=files[i].indexOf(',')
-            ext=files[i].substr(0,ext+1)
+/*             ext=files[i].indexOf(',')
+            ext=files[i].substr(0,ext+1) */
             
                 await b642ab(files[i]).then((ab)=>{
                     val.push(send)
@@ -88,14 +94,13 @@ async function makefile(baseImage,send,recv,fname,files,extensions)
                     val.push(fname[i])
                     val.push(extensions[i])
                     val.push(ab)
-                    vals.push(val)
                     ext=fname[i].split('.')
                     ext=ext[ext.length-1]
                     if(ext=='jpg'||ext=='jpeg'||ext=='png'||ext=='tiff')
-                    query="insert into messages(sender_id,receiver_id,attachment,extension,ImageBlob) values ?;"
+                    query="insert into messages(sender_id,receiver_id,attachment,extension,ImageBlob) values(?,?,?,?,?);"
                     else
-                    query="insert into messages(sender_id,receiver_id,attachment,extension,Fileblob) values ?;"
-                    sql.query(query,[vals],(err,result)=>{
+                    query="insert into messages(sender_id,receiver_id,attachment,extension,Fileblob) values (?,?,?,?,?);"
+                    sql.execute(query,val,(err,result)=>{
                         if(err)throw err
                         else
                         {

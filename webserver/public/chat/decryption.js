@@ -6,7 +6,7 @@ function str2ab(str) {
     }
     return buf;
   }
-  function b642ab(base64string){
+  async function b642ab(base64string){
     return Uint8Array.from(window.atob(base64string), c => c.charCodeAt(0));
   }
   
@@ -70,6 +70,9 @@ function getEncodedKeyValue(uid,fid)
           ),
           success:function(res)
           {
+            if(res=="empty")
+            r(res)
+            else
             s(res)
           }
       }
@@ -103,8 +106,8 @@ function loadKeys(uid,f_id)
           ).then((Mykey)=>{
               
               
-              getEncodedKeyValue(uid,f_id).then((enc)=>{
-                enc=b642ab(enc)
+              getEncodedKeyValue(uid,f_id).then(async (enc)=>{
+                enc=await b642ab(enc)
                 window.crypto.subtle.decrypt(
                     {
                       name: "RSA-OAEP",

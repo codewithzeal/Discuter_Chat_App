@@ -31,7 +31,13 @@ function str2ab(str) {
         ),
         success:function(res)
         {
-          if(res.status=="ok")
+          if(res=="empty")
+          alert("error occured please contact namangns1@gmail.com")
+          else if(res=="ae"){
+          alert("User does not exists")
+            r("ae")
+        }
+          else if(res.status=="ok")
           {
             const pem =res.pubKey
             const pemHeader = "-----BEGIN PUBLIC KEY-----";
@@ -113,6 +119,8 @@ function str2ab(str) {
             localStorage.setItem(uid+fid,exportedAsBase64)
             encryptKeys(exportedAsBase64,fid).then((data)=>{
                 s(data)
+            }).catch((data)=>{
+              r()
             })
 
 

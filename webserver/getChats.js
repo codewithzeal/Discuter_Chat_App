@@ -6,14 +6,23 @@ app.use(express.json())
 app.post('/getChats',(req,res)=>{
     send=req.body.send;
     recv=req.body.recv;
-    querry="select message_id,sender_id,receiver_id,text,attachment,extension,ImageBlob,dateCreated from messages where (sender_id='"+send+"' and receiver_id='"+recv+"') or (sender_id='"+recv+"' and receiver_id='"+send+"')"
-    sql.query(querry,(err,result)=>{
+    if(!send||!recv)
+    res.send("empty")
+    else{
+        val=[]
+        val.push(send)
+        val.push(recv)
+        val.push(recv)
+        val.push(send)
+    querry="select message_id,sender_id,receiver_id,text,attachment,extension,ImageBlob,dateCreated from messages where (sender_id=? and receiver_id=?) or (sender_id=? and receiver_id=?)"
+    sql.execute(querry,val,(err,result)=>{
         if(err) throw err
         else
         {
             res.send(result)
         }
     })
+}
 })
 
 module.exports=app;

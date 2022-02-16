@@ -16,6 +16,8 @@ function validate()
             data:JSON.stringify({un:uname,pwd:password}),
             success:function(response)
             {
+                if(response=="empty")
+                alert("fields were submitted empty")
                 if(response=="ok")
                 alert("registered")
                 {
@@ -27,7 +29,7 @@ function validate()
             },
             error:function(response)
             {
-                alert(response)
+                alert("error occured")
             }
         }
     )
@@ -93,9 +95,14 @@ function uploadPublicKey(value)
                     pubKey:value
                 }
             ),
+            success:function(response)
+            {
+                if(response=="empty")
+                alert("error occured")
+            },
             error:function(res)
             {
-                alert(res)
+                alert("error occured")
             }
         }
     )
