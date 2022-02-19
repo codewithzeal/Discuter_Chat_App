@@ -3,10 +3,12 @@ var express=require('express')
 var app=express.Router()
 app.use(express.urlencoded({extended: true}));
 app.use(express.json())
+const session = require('express-session') 
+app.use(session({secret: 'Your_Secret_Key',resave:false,saveUninitialized:false}))
 app.post('/getChats',(req,res)=>{
     send=req.body.send;
     recv=req.body.recv;
-    if(!send||!recv)
+    if((!send||!recv)&&send==req.session.login)
     res.send("empty")
     else{
         val=[]

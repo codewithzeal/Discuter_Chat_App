@@ -18,7 +18,7 @@ async function decryptMessage(content,uid,fid,i)
   {
     
     return new Promise(async (s,r)=>{
-        key=localStorage.getItem(uid+fid)
+        key=localStorage.getItem(uid+fid) 
     
         importKey(key).then(async (key)=>{
            

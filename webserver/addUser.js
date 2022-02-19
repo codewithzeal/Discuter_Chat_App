@@ -1,15 +1,17 @@
 var express=require('express')
+const session = require('express-session') 
 var app=express.Router();
-var db=require('./Datbase_connect.js');
-var sql=db.connect();
+var sql=require('./getSql')
 app.use(express.urlencoded({extended: true}));
 app.use(express.json())
+app.use(session({secret: 'Your_Secret_Key',resave:false,saveUninitialized:false}))
 app.post('/addUser',(req,res)=>{
     var fid=req.body.f_id;
     var uid=req.body.uid;
-    if(!fid||!uid)
+    if((!fid||!uid)&&uid==req.session.login)
     {
         res.send("empty error")
+        return
     }
     if(fid==uid)
     {

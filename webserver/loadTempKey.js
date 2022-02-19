@@ -4,10 +4,11 @@ var app=express.Router()
 app.use(express.urlencoded({extended: true}));
 app.use(express.json())
 var sql=require('./getSql')
+app.use(session({secret: 'Your_Secret_Key',resave:false,saveUninitialized:false}))
 app.post('/getTempKeys',(req,res)=>{
     uid=req.body.uid
     f_id=req.body.f_id
-    if(!uid||!f_id)
+    if((!uid||!f_id)&&uid==req.session.login)
     res.send("empty")
     else{
     val=[]

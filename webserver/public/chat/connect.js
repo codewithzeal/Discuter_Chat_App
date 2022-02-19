@@ -69,6 +69,11 @@ function getUsersOnline()
 function addUser()
 {
   fid=document.getElementById("f_id").value.toString();
+  if(localStorage.getItem(uid+fid))
+  {
+    alert("you already have him as your friend")
+    return
+  }
   getKeys(uid,fid).then((data)=>{
     if(fid)
   {
@@ -157,7 +162,7 @@ function appendStatus(id)
   document.getElementById("status"+id).innerHTML=id+"(Online)";
 }
 socket.on("get-name",(u_online)=>{
-  
+
   users_online=new Set(u_online)
   setStatus();
 
@@ -235,7 +240,6 @@ else
 }
 })
 socket.on("receive-files",(data)=>{
-  console.log(data)
   if(current_person==data.giverId){
   appendFileRight(data.data)
 a=document.getElementById('append-text')
@@ -313,13 +317,9 @@ function StoreMessage(texts,senders,receivers,checks,attachments)
       }),
       success:function(response)
       {
-        if(response=="ok")
+         if(response!="ok")
         {
-          alert("error 2 occured please contact namangns1@gmail.com")
-        }
-        else if(response!="ok")
-        {
-          alert("server error occured 3")
+          alert("server error occured 3 please contact namangns1@gmail.com")
         }
       }
     }
@@ -408,7 +408,7 @@ async function _arrayBufferToBase64( buffer ) {
 async function appendChats(result)
 {
   resultV=result
-  //console.log(result)
+
   dir=""
   var i
   document.getElementById("append-text").innerHTML=""
@@ -416,7 +416,7 @@ async function appendChats(result)
   {
     document.getElementById("append-text").innerHTML="";
   }
-  console.log(result.length)
+ 
   for(i=0;i<result.length;i++)
   {
     check=true
@@ -450,7 +450,7 @@ async function appendChats(result)
              await _arrayBufferToBase64(result[i].ImageBlob.data).then(async(data1)=>{
                await decryptMessage(data1,uid,current_person,0).then(async(data)=>{
                   div.appendChild(img)
-                  //console.log(result)
+                  
                   img.src=result[i].extension+data.data
                   return true;
                 })
@@ -526,7 +526,7 @@ for(i=0;i<files.length;)
     a=e.target.result.toString()
     file_arr_preview[c]=a
     a=a.substring(a.indexOf(',')+1)
-    //console.log(a)
+    
     await encryptMessage(a,current_person).then((data)=>{
       file_arr[c]=data
       names[c]=files[c].name
@@ -639,7 +639,7 @@ async function filePost()
       var xhr = new window.XMLHttpRequest();
       xhr.upload.addEventListener("progress", function(evt) {
           if (evt.lengthComputable) {
-              console.log("yaha")
+              
               var percentComplete = evt.loaded / evt.total;
               newprogress=percentComplete*100
               div.style.width=newprogress+"%"
@@ -679,13 +679,7 @@ async function filePost()
       file_arr=[]
       imgs=[]
       data_to_send=[]
-      size=0
       file_arr_preview=[]
-      file_data={
-      files:filec,
-      send:uid,
-      recv:current_person
-      }
     })
      
   }

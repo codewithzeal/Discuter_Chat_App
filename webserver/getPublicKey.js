@@ -3,10 +3,11 @@ var app=express.Router()
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 var sql=require('./getSql.js')
+const session = require('express-session') 
+app.use(session({secret: 'Your_Secret_Key',resave:false,saveUninitialized:false}))
 app.post('/getPublicKey',(req,res)=>{
-    
     id=req.body.id
-    if(!id)
+    if(!id&&req.body.uid==req.session.login)
     res.send("empty")
     else
     {

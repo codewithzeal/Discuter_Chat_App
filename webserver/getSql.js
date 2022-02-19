@@ -7,4 +7,4 @@ sql.query(query,(err,result)=>{
 
     }
 })
-module.exports=sql;
+module.exports=sql; 

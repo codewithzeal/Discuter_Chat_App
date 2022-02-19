@@ -17,7 +17,7 @@ app.use(addUser);
 app.use(chat)
 app.use(login)
 app.use(getChats)
-app.use(StoreMessage)
+app.use(StoreMessage) 
 app.use(filePost)
 app.use(signup)
 app.use(storePublicKey)

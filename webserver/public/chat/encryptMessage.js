@@ -54,12 +54,12 @@ function _base64ToArrayBuffer(base64) {
         ).then((data)=>{
           s(_arrayBufferToBase64(data))
         }).catch((err)=>{
-          alert("encrypt hi nhi kar rha")
+          alert("error 21 occured please refresh")
           console.log(err)
         });
     
       }).catch((err)=>{
-        alert("erroe to import mein")
+        alert("error 22 occured please referesh")
       })
     })
     

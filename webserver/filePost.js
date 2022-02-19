@@ -1,4 +1,5 @@
 var express=require('express')
+const session = require('express-session') 
 window=require('buffer')
 var app=express.Router()
 var sql=require('./getSql')
@@ -6,6 +7,7 @@ fs = require('fs');
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 var formidable = require('formidable');
+app.use(session({secret: 'Your_Secret_Key',resave:false,saveUninitialized:false}))
 app.post('/filePost',(req,res)=>{
     //console.log("Ye toh theek hai")
     const form = new formidable.IncomingForm();
@@ -18,7 +20,7 @@ app.post('/filePost',(req,res)=>{
         fname=JSON.parse(fields['fname'])
         files=JSON.parse(fields['files'])
         extensions=JSON.parse(fields['extensions'])
-        if(!send||!recv||!fname||!files||!extensions)
+        if((!send||!recv||!fname||!files||!extensions)&&send==req.session.login)
         {
             res.send("empty")
         }

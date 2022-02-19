@@ -1,4 +1,5 @@
 const session = require('express-session') 
+var crypto = require('crypto');
 var express = require('express')
 var app=express.Router()
 app.use(express.static(__dirname + '/public/login'));
@@ -14,7 +15,7 @@ uid=req.body.uid;
 password=req.body.password;
 val=[]
 val.push(uid)
-val.push(password)
+val.push(crypto.createHash('sha256').update(password).digest('base64'))
 var flag=0;
 var query="select * from `users` where `uid`=? and `password`=?";
 sql.execute(query,val,(err,result)=>{

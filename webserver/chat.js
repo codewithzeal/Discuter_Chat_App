@@ -15,4 +15,4 @@ app.get('/chat/:uid',(req,res)=>{
     else
     res.redirect('/login')
 })
-module.exports=app;
+module.exports=app; 

@@ -30,11 +30,10 @@ io.on("connection",(socket)=>{
 
     socket.on("send-text",(data)=>{
       io.to(users_map[data.toid]).emit("recieve-text",{content:data.content,giverId:data.myId})
-      //console.log(data.content)
     })
 
     socket.on("send-files",data=>{
-      
+     
       io.to(users_map[data.recv]).emit("receive-files",{data:data.data,giverId:data.giverId})
     })    
 

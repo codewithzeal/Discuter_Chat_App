@@ -26,7 +26,8 @@ function str2ab(str) {
         contentType:'application/json',
         data:JSON.stringify(
           {
-            id:toid
+            id:toid,
+            uid:uid
           }
         ),
         success:function(res)

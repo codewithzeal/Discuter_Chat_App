@@ -21,7 +21,7 @@ function login()
                     return
                 }
                 else if(response=="N")
-                alert("Invalid login credential");
+                alert("Invalid login credential"); 
                 else
                 window.location="http://localhost:3000/chat/"+response
             }

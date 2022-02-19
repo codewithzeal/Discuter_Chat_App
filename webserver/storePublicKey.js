@@ -13,7 +13,7 @@ app.post('/storePublicKey',(req,res)=>{
     }
     else{
         val=[]
-        val.push(pubKey)
+        val.push(pubKey) 
         val.push(user)
     query="update users set publicKey=? where uid=?;"
     sql.query(query,val,(err,result)=>{

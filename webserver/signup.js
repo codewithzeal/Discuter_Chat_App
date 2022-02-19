@@ -1,3 +1,4 @@
+var crypto = require('crypto');
 var express = require('express')
 var app=express.Router()
 app.use(express.static(__dirname + '/public/signup/js'));
@@ -19,7 +20,7 @@ app.post('/signup',(req,res)=>{
         val0=[]
         val1=[]
         val0.push(uname)
-        val0.push(password)
+        val0.push(crypto.createHash('sha256').update(password).digest('base64'))
         val1.push(uname)
 
     query="insert into users(uid,password) values (?,?);"

@@ -5,9 +5,10 @@ var log={
     
     var config=
     {
-        host: 'localhost',
-        user: 'naman',
-        password: 'inaman123',
+        host: '',
+        port:"3306",
+        user: '',
+        password: '',
         database: 'chat'
     }
     const db=mysql.createConnection(config);
@@ -16,6 +17,7 @@ var log={
         {
             console.log('There was an error');
         }
+       console.log("connected sucessfully")
        
     })
 

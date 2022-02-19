@@ -14,7 +14,7 @@ app.post('/store-message',(req,res)=>{
         res.send("empty")
     }
     else
-    {
+    { 
     query=""
     val=[]
     val.push(sender)

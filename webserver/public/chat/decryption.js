@@ -14,7 +14,7 @@ function str2ab(str) {
   {
     rtvalue=""
     pem=localStorage.getItem(uid+'privatekey') 
-    console.log(pem,keyPerson) 
+     
     const pemHeader = "-----BEGIN PRIVATE KEY-----";
       const pemFooter = "-----END PRIVATE KEY-----";
       const pemContents = pem.substring(pemHeader.length, pem.length - pemFooter.length);
@@ -119,7 +119,7 @@ function loadKeys(uid,f_id)
                     var enc = new TextDecoder("utf-8");
                     var arr = new Uint8Array(data);
                     rtvalue= enc.decode(arr)
-                    console.log( rtvalue)
+                    
                     s(rtvalue)
                     //return(enc.decode(arr))
                   }).catch((res)=>{
