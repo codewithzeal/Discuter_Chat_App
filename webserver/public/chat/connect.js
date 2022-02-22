@@ -464,6 +464,7 @@ async function appendChats(result)
             div.appendChild(divWrap)
             icon=document.createElement("i")
             icon.setAttribute("class","fa fa-download fa-sm")
+            icon.setAttribute("id",result[i].message_id)
             icon.setAttribute("onclick","download('"+result[i].message_id+"')")
             icon.setAttribute("style","float:right;position:relative;margin-top:4px;cursor:pointer;")
             p=document.createElement("p")
@@ -503,7 +504,19 @@ async function appendChats(result)
   a.scrollTop=a.scrollHeight-a.clientHeight
   index=i
 }
-function doUpload()
+
+function readFile(file){
+return new Promise((s,r)=>{
+  fr=new FileReader()
+  fr.readAsDataURL(file);
+  fr.onload=async (e)=>
+  {
+      s(e.target.result.toString())
+  }
+})
+}
+
+async function doUpload()
 {
   dict={}
   c=0
@@ -512,35 +525,31 @@ function doUpload()
 
   var files=document.getElementById("file-attachment").files;
   objects=[]
-  for(i=0;i<files.length;i++){
-    objects.push(new FileReader())
-}
-for(i=0;i<files.length;)
+
+for(i=0;i<files.length;i++)
 {
   
-  objects[i].readAsDataURL(files[i]);
-  objects[i].onload=async (e)=>
+  await readFile(files[i]).then(async (fasb64)=>
   {
-    c=objects.indexOf(e.target)
-    cnt++;
-    a=e.target.result.toString()
-    file_arr_preview[c]=a
+    a=fasb64
+    ac=fasb64
+    file_arr_preview.push(a)
     a=a.substring(a.indexOf(',')+1)
     
     await encryptMessage(a,current_person).then((data)=>{
-      file_arr[c]=data
-      names[c]=files[c].name
-      ext=names[c].split(".")
+      file_arr.push(data)
+      names.push(files[i].name)
+      ext=names[i].split(".")
       ext=ext[ext.length-1]
-      bext=e.target.result.toString()
+      bext=ac
       bext=bext.substr(0,bext.indexOf(',')+1)
-      extension[c]=bext
+      extension.push(bext)
       if(ext=='jpg'||ext=='jpeg'||ext=='png'||ext=='tiff')
       {
         temp={
           append:"no",
-          src:file_arr[c],
-          ext:extension[c]
+          src:data,
+          ext:bext
         }
         data_to_send.push(temp)
       }
@@ -548,21 +557,18 @@ for(i=0;i<files.length;)
       {
         temp={
           append:"yes",
-          data:names[c]
+          data:names[i]
         }
         data_to_send.push(temp)
       }
-      if(cnt==files.length)
-      {
-        previewIt(file_arr_preview,names)
-        document.getElementById("file-attachment").value=''
-      }
     })
    
-  }
-  i++;
+  })
+  
 }
-
+imgs=names
+previewIt(file_arr_preview,names)
+document.getElementById("file-attachment").value=''
 }
 
 function previewIt(file_urls,file_heads)
@@ -570,14 +576,15 @@ function previewIt(file_urls,file_heads)
   var modal = document.getElementById("myModal");
   modal.style.display = "block";
   c=0
-  imgs=file_heads
-  
-    val=imgs[c].split(".")
+  if(file_heads[c]) {
+    document.getElementById("fileHead").innerHTML=file_heads[c]
+  val=file_heads[c].split(".")
     ext=val[val.length-1]
     if(ext=='jpg'||ext=='jpeg'||ext=='png'||ext=='tiff')
     document.getElementById("img").src=file_urls[c]
     else
     document.getElementById("img").src="/abcd.jpg"
+  }
 }
 
 async function loadBar()
@@ -737,8 +744,7 @@ async function appendFileLeft(file_value,file_names)
       divWrap=document.createElement("div")
       div.appendChild(divWrap)
       icon=document.createElement("i")
-      icon.setAttribute("class","fa fa-download fa-sm")
-      icon.setAttribute("onclick","download('"+file_names[i]+"')")
+      icon.setAttribute("class","fa fa-file fa-sm")
       icon.setAttribute("style","float:right;position:relative;margin-top:4px;cursor:pointer;")
       p=document.createElement("p")
       p.innerHTML=file_names[i]

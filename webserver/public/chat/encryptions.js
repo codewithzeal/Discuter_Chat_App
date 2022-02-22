@@ -77,7 +77,8 @@ function str2ab(str) {
           }
           else
           {
-            alert("error in encryption of keys beacuse of server")
+            alert("Please check the id entered")
+            localStorage.removeItem(uid+toid)
           }
         },
         error:function(res)

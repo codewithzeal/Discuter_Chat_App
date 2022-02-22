@@ -123,7 +123,9 @@
 
 
 <div id="myModal" class="modal">
-
+    <center>
+     
+    </center>
   <!-- Modal content -->
   <div class="modal-content" style="background-color: white">
     <span class="close">&times;</span>
@@ -131,6 +133,9 @@
         <h1>
             Previews
         </h1>
+    </center><br>
+    <center>    
+        <h4 id="fileHead"></h4>
     </center>
     <div class="container-fluid" >
         <div class="row">
@@ -203,10 +208,11 @@ window.onclick = function(event) {
     else
     {
         c++;
+        document.getElementById("fileHead").innerHTML=imgs[c]
         val=imgs[c].split(".")
         ext=val[val.length-1]
         if(ext=='jpg'||ext=='jpeg'||ext=='png'||ext=='tiff')
-          document.getElementById("img").src=file_arr[c]
+          document.getElementById("img").src=file_arr_preview[c]
         else
           document.getElementById("img").src="/abcd.jpg"
     }
@@ -222,10 +228,11 @@ function prev()
     else
     {
         c--;
+        document.getElementById("fileHead").innerHTML=imgs[c]
         val=imgs[c].split(".")
         ext=val[val.length-1]
         if(ext=='jpg'||ext=='jpeg'||ext=='png'||ext=='tiff')
-          document.getElementById("img").src=file_arr[c]
+          document.getElementById("img").src=file_arr_preview[c]
         else
           document.getElementById("img").src="/abcd.jpg"
     }

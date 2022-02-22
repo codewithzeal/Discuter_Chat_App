@@ -5,9 +5,12 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev1":"cd webserver&&nodemon main.js",
-    "dev2":"cd ChatServer && nodemon server.js"
+    "dev1": "cd webserver&&nodemon main.js",
+    "dev2": "cd ChatServer && nodemon server.js"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "uuid": "^8.3.2"
+  }
 }
