@@ -1,4 +1,5 @@
 var express=require('express')
+const { v4: uuidv4 } = require('uuid');
 const session = require('express-session') 
 window=require('buffer')
 var app=express.Router()
@@ -72,7 +73,7 @@ function updateLimit()
 async function makefile(baseImage,send,recv,fname,files,extensions)
 {
 
-
+        returnIds=[]
         for(i=0;i<files.length;i++)
         {
             flag=0
@@ -87,6 +88,7 @@ async function makefile(baseImage,send,recv,fname,files,extensions)
             return
             vals=[]
             val=[]
+            var a
 /*             ext=files[i].indexOf(',')
             ext=files[i].substr(0,ext+1) */
             
@@ -96,18 +98,22 @@ async function makefile(baseImage,send,recv,fname,files,extensions)
                     val.push(fname[i])
                     val.push(extensions[i])
                     val.push(ab)
+                    a=uuidv4()
+                    val.push(a)
+                    returnIds.push(a)
                     ext=fname[i].split('.')
                     ext=ext[ext.length-1]
                     if(ext=='jpg'||ext=='jpeg'||ext=='png'||ext=='tiff')
-                    query="insert into messages(sender_id,receiver_id,attachment,extension,ImageBlob) values(?,?,?,?,?);"
-                    else
-                    query="insert into messages(sender_id,receiver_id,attachment,extension,Fileblob) values (?,?,?,?,?);"
+                    query="insert into messages(sender_id,receiver_id,attachment,extension,ImageBlob,uuid) values(?,?,?,?,?,?);"
+                    else{
+                        query="insert into messages(sender_id,receiver_id,attachment,extension,Fileblob,uuid) values (?,?,?,?,?,?);"
+                    }
                     sql.execute(query,val,(err,result)=>{
                         if(err)throw err
                         else
                         {
-                            console.log("here")
-                            res.end("ok")
+                            //console.log("here")
+                           
                             
                         }
                     })
@@ -117,6 +123,7 @@ async function makefile(baseImage,send,recv,fname,files,extensions)
             
            
         }
+        res.send({status:"ok",Ids:returnIds})
         updateLimit()
         
 }

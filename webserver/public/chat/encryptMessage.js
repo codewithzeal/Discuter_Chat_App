@@ -1,4 +1,4 @@
-function _base64ToArrayBuffer(base64) {
+async function _base64ToArrayBuffer(base64) {
     return new Promise((s,r)=>{
       var binary_string = window.atob(base64);
       var len = binary_string.length;

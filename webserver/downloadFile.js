@@ -6,20 +6,22 @@ app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(session({secret: 'Your_Secret_Key',resave:false,saveUninitialized:false}))
 app.post('/download',(req,res)=>{
-    uid=req.body.uid
-    if(req.session.login==uid)
+    if(req.session.login==req.body.uid)
     {
-        query="select extension Fileblob from messages where message_id=?"
-        sql.execute(query,[sno],(err,result)=>{
+        query="select attachment,extension,Fileblob from messages where uuid=?"
+        val=[]
+        val.push(req.body.uuid)
+        sql.execute(query,val,(err,result)=>{
             if(err)
             throw err
+            //console.log(result)
             if(result[0].extension&&result[0].Fileblob)
             {
-                res.send({ext:result[0].extension,ab:result[0].Fileblob})
+                res.send({status:"ok",ext:result[0].extension,ab:result[0].Fileblob,attachment:result[0].attachment})
             }
             else
             {
-                result.send("empty")
+                res.send({status:"empty"})
             }
         })
     }
@@ -28,3 +30,4 @@ app.post('/download',(req,res)=>{
         res.send("empty")
     }
 })
+module.exports=app

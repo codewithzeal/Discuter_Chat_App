@@ -241,7 +241,7 @@ else
 })
 socket.on("receive-files",(data)=>{
   if(current_person==data.giverId){
-  appendFileRight(data.data)
+  appendFileRight(data.data,data.Ids)
 a=document.getElementById('append-text')
 a.scrollTop=a.scrollHeight-a.clientHeight  
 }
@@ -388,10 +388,67 @@ function getChats()
   })
 }
 
-
-function download(id)
+function showWaitingMessage(id)
 {
-
+  document.getElementById("p"+id).innerHTML="Fetching..."
+}
+async function download(id)
+{
+  if(!id)
+  alert("error occured")
+  else
+  {
+    actualText=document.getElementById("p"+id).innerHTML;
+    showWaitingMessage(id)
+    $.ajax({
+      url:'/download',
+      method:'POST',
+      contentType:"application/json",
+      data:JSON.stringify(
+        {
+          uid:uid,
+          uuid:id
+        }
+      ),
+      success:async function(res)
+      {
+        if(res.status=="ok")
+        {
+          b64=await _arrayBufferToBase64(res.ab.data).then(async (data1)=>{
+            await decryptMessage(data1,uid,current_person,0).then(async (data2)=>{
+              console.log(res.ext+data2.data)
+              type=res.ext
+              type=type.substr(type.indexOf(':')+1,type.indexOf(';'))
+              b=await _base64ToArrayBuffer(data2.data).then((data3)=>{
+                document.getElementById("p"+id).innerHTML=actualText
+                blob=new Blob([data3],{type:type})
+                console.log(blob)
+                url = window.URL.createObjectURL(blob);
+                var a = document.createElement('A');
+                a.href = url
+                a.download = res.attachment
+                a.setAttribute("style","display:none;")
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+              })
+              
+            })
+            
+          })
+        }
+        else
+        {
+          alert("error w2 occurred please refresh or contact namangns1@gmail.com")
+          console.log(res)
+        }
+      },
+      error:function(res)
+      {
+        console.log("error w1 occured please refresh or contact namangns1@gmail.com")
+      }
+    })
+  }
 }
 
 async function _arrayBufferToBase64( buffer ) {
@@ -464,12 +521,13 @@ async function appendChats(result)
             div.appendChild(divWrap)
             icon=document.createElement("i")
             icon.setAttribute("class","fa fa-download fa-sm")
-            icon.setAttribute("id",result[i].message_id)
-            icon.setAttribute("onclick","download('"+result[i].message_id+"')")
+            icon.setAttribute("id",result[i].uuid)
+            icon.setAttribute("onclick","download('"+result[i].uuid+"')")
             icon.setAttribute("style","float:right;position:relative;margin-top:4px;cursor:pointer;")
             p=document.createElement("p")
             p.innerHTML=result[i].attachment
             p.setAttribute("style","float:left;margin:auto;font-size:15px;color:white")
+            p.setAttribute("id","p"+result[i].uuid)
             divWrap.appendChild(p)
             divWrap.appendChild(icon)
             div.style.backgroundColor="rgb(236,105,162)"
@@ -678,11 +736,11 @@ async function filePost()
     {
       alert("error 5 occured send in your complaint to namangns1@gmail.com")
     }
-    else if(response=="ok"){
+    else if(response.status=="ok"){
       
-    appendFileLeft(file_arr_preview,filec).then((data)=>{
+    appendFileLeft(file_arr_preview,filec,response.Ids).then((data)=>{
        
-      socket.emit("send-files",{recv:current_person,data: data_to_send,giverId:uid})
+      socket.emit("send-files",{recv:current_person,data: data_to_send,giverId:uid,Ids:response.Ids})
       file_arr=[]
       imgs=[]
       data_to_send=[]
@@ -716,7 +774,7 @@ function openup()
   document.getElementById("file-attachment").click()
 }
 
-async function appendFileLeft(file_value,file_names)
+async function appendFileLeft(file_value,file_names,Ids)
 {
   
   for(i=0;i<file_names.length;i++)
@@ -744,8 +802,9 @@ async function appendFileLeft(file_value,file_names)
       divWrap=document.createElement("div")
       div.appendChild(divWrap)
       icon=document.createElement("i")
-      icon.setAttribute("class","fa fa-file fa-sm")
+      icon.setAttribute("class","fa fa-download fa-sm")
       icon.setAttribute("style","float:right;position:relative;margin-top:4px;cursor:pointer;")
+      icon.setAttribute("onclick","download('"+Ids[i]+"')")
       p=document.createElement("p")
       p.innerHTML=file_names[i]
       p.setAttribute("style","float:left;margin:auto;font-size:15px;color:white")
@@ -772,7 +831,7 @@ async function appendFileLeft(file_value,file_names)
   return true
 }
 
-async function appendFileRight(file_names)
+async function appendFileRight(file_names,Ids)
 {
   
   for(i=0;i<file_names.length;i++)
@@ -796,7 +855,7 @@ async function appendFileRight(file_names)
       div.appendChild(divWrap)
       icon=document.createElement("i")
       icon.setAttribute("class","fa fa-download fa-sm")
-      icon.setAttribute("onclick","download('"+file_names[i].data+"')")
+      icon.setAttribute("onclick","download('"+Ids[i]+"')")
       icon.setAttribute("style","float:right;position:relative;margin-top:4px;cursor:pointer;")
       p=document.createElement("p")
       p.innerHTML=file_names[i].data
