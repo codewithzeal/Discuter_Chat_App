@@ -1,4 +1,4 @@
-const socket=io('http://localhost:8000',{});
+const socket=io('https://discutersocket.namanprojects.com',{});
 var contacts
 users_online=new Set();
 uid=""
@@ -89,6 +89,8 @@ function addUser()
       success: function(response) {
         if(response=="OK"){
         appendContact(fid);
+	if(!contacts.length)
+		setCurrentName(fid,'true')
       }
         else if(response=="N")
         alert("InvalidId such a user does not exists");
@@ -108,7 +110,7 @@ function addUser()
   
 }
 
-function attachLists(list)
+async function attachLists(list)
 {
   if(!list.length){
     document.getElementById("loadingModal").style.display="none"
@@ -116,13 +118,15 @@ function attachLists(list)
 }
   current_person=list[0].id1;
   setCurrentName(current_person,'true')
-  getChats()
   for(i=0;i<list.length;i++)
-  appendContact(list[i].id1)
+  await appendContact(list[i].id1)
+  getChats()
 }
-function appendContact(f_id,status)
+async function appendContact(f_id,status)
 {
-  if(localStorage.getItem(uid+f_id)){
+  return new Promise(async(s,r)=>{
+
+	 if(localStorage.getItem(uid+f_id)){
   var div=document.createElement("div");
   div.setAttribute("class","row m-1 justify-content-center contactDivision");
   div.setAttribute("id",f_id);
@@ -132,10 +136,11 @@ function appendContact(f_id,status)
   p.innerHTML=f_id;
   document.getElementById("contactListContainer").appendChild(div)
   document.getElementById(f_id).appendChild(p);
+  
   }
   else
   {
-    loadKeys(uid,f_id).then((key)=>{
+    await loadKeys(uid,f_id).then((key)=>{
       if(key){
       localStorage.setItem(uid+f_id,key)
       appendContact(f_id,status)
@@ -146,6 +151,10 @@ function appendContact(f_id,status)
       }
     })
   }
+	  s()
+
+  })
+ 
 }
 function setStatus()
 {
@@ -207,7 +216,7 @@ function sendContent()
   if(!attachment)
   {
       var contentValue=document.getElementById("content").value.toString();
-      if(contentValue=='')
+      if(contentValue==''||!current_person)
       {
         return
       }
@@ -347,6 +356,7 @@ function getChats()
   if(fetched[current_person])
   return
   result=""
+  console.log(current_person,uid)
   $.ajax({
     xhr: function() {
       var xhr = new window.XMLHttpRequest();
@@ -576,6 +586,8 @@ return new Promise((s,r)=>{
 
 async function doUpload()
 {
+  if(!current_person)
+	return
   dict={}
   c=0
   names=[]
@@ -855,9 +867,11 @@ async function appendFileRight(file_names,Ids)
       div.appendChild(divWrap)
       icon=document.createElement("i")
       icon.setAttribute("class","fa fa-download fa-sm")
+      icon.setAttribute("id",Ids[i])
       icon.setAttribute("onclick","download('"+Ids[i]+"')")
       icon.setAttribute("style","float:right;position:relative;margin-top:4px;cursor:pointer;")
       p=document.createElement("p")
+      p.setAttribute("id","p"+Ids[i])
       p.innerHTML=file_names[i].data
       p.setAttribute("style","float:left;margin:auto;font-size:15px;color:white")
       divWrap.appendChild(p)

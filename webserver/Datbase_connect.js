@@ -5,22 +5,13 @@ var log={
     
     var config=
     {
-        host: '',
-        port:"",
+        host: 'chat-database.c0tmgbl6t2tm.ap-south-1.rds.amazonaws.com',
+        port:"3306",
         user: 'naman',
-        password: '',
+        password: 'inaman123',
         database: 'chat'
     }
     const db=mysql.createConnection(config);
-    db.connect((err)=>{
-        if(err)
-        {
-            console.log('There was an error');
-        }
-       console.log("connected sucessfully")
-       
-    })
-
 return db;
 }
 }

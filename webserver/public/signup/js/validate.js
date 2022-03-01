@@ -29,7 +29,7 @@ function validate()
             },
             error:function(response)
             {
-                alert("error occured")
+                alert("error occured su1")
             }
         }
     )
@@ -98,11 +98,11 @@ function uploadPublicKey(value)
             success:function(response)
             {
                 if(response=="empty")
-                alert("error occured")
+                alert("error occured su2")
             },
             error:function(res)
             {
-                alert("error occured")
+                alert("error occured su3")
             }
         }
     )

@@ -1,6 +1,6 @@
 const io = require('socket.io')(8000, {
     cors: {
-      origin: 'http://localhost:3000',
+	    origin: 'https://discuterchat.namanprojects.com',
     }
   });
 console.log("server is running")

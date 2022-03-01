@@ -6,8 +6,28 @@ app.use(express.static(__dirname + '/public/login'));
 app.use(express.urlencoded({extended: true}));
 app.use(express.json())
 app.use(session({secret: 'Your_Secret_Key',resave:false,saveUninitialized:false}))
-var sql=require('./getSql')
-app.get('/login',(req,res)=>{
+
+
+var db=require('./Datbase_connect.js').connect()
+function test()
+{
+    return new Promise((s,r)=>{
+        db.ping((err)=>{
+            if(err)
+            {
+                db.connect()
+                s()
+            }
+            else
+            {
+                s()
+            }
+        })
+    })
+}
+var sql=require('./getSql.js')
+app.get('/login',async(req,res)=>{
+    await test()
     res.render('login.ejs');
 })
 app.post('/login',(req,res)=>{

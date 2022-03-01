@@ -12,10 +12,9 @@ function login()
                 password: $('#password').val(),  
             }),
             success: function(response) {
-                alert(response)
                 uid=document.getElementById("name")
                 password=document.getElementById("password")
-                if(!localStorage.getItem(response+'privatekey')&&response!='N')
+                if(response!='N'&&!localStorage.getItem(response+'privatekey'))
                 {
                     alert("Sorry the device isn't recognized.")
                     return
@@ -23,7 +22,7 @@ function login()
                 else if(response=="N")
                 alert("Invalid login credential"); 
                 else
-                window.location="http://localhost:3000/chat/"+response
+                window.location="https://discuterchat.namanprojects.com/chat/"+response
             }
         });
 }

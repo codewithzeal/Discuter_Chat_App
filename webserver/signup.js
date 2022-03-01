@@ -6,12 +6,33 @@ app.use(express.static(__dirname + '/public'));
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 var sql=require('./getSql.js')
-app.get('/home',(req,res)=>{
+var db=require('./Datbase_connect.js').connect()
+app.get('/',async(req,res)=>{
+    await test()
     res.render('signup.ejs')
 })
+
+function test()
+{
+    return new Promise((s,r)=>{
+        db.ping((err)=>{
+            if(err)
+            {
+                db.connect()
+                s()
+            }
+            else
+            {
+                s()
+            }
+        })
+    })
+}
+
 app.post('/signup',(req,res)=>{
     uname=req.body.un
     password=req.body.pwd
+    console.log("singup.js ",uname,password)	
     if(!uname||!password)
     {
         res.send("empty")
